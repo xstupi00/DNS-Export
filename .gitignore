@@ -1,0 +1,7 @@
+#####=== OSX ===#####
+.DS_Store
+
+## Directory-based project format:
+.idea/
+cmake-build-debug/
+CMakeLists.txt
