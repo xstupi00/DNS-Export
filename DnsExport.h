@@ -1,14 +1,15 @@
-//
-// Created by Simon Stupinsky on 28/09/2018.
-//
-
 #ifndef DNSEXPORT_H
 #define DNSEXPORT_H
 
-#include <string>
-#include <netinet/in.h>
+#include <iostream>
+#include <vector>
 
 using namespace std;
+
+struct AddressWrapper {
+    std::vector<struct sockaddr_in> addr_IPv4;
+    std::vector<struct sockaddr_in6> addr_IPv6;
+};
 
 
 class DnsExport {
@@ -17,12 +18,11 @@ class DnsExport {
         ~DnsExport();
 
         std::string pcap_file = "";       ///< name of the pcap file
-        struct sockaddr_in6 syslog_server_addr;  ///< IPv6 variant
-        std::string interface;   ///< name of the network interface
+        struct AddressWrapper syslog_server_addr; ///< ipv4/ipv6/hostname of syslog server
+        struct AddressWrapper interface_addr;   ///< name of the network interface
         double time_in_second = 60;       ///< calculation time of statistics
 
         void run(int argc, char **argv);
 };
-
 
 #endif //DNSEXPORT_H

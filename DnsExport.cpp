@@ -1,13 +1,10 @@
-//
-// Created by Simon Stupinsky on 28/09/2018.
-//
-
 #include <iostream>
 #include <csignal>
 #include <unistd.h>
 
 #include "DnsExport.h"
 #include "ArgumentsParser.h"
+
 
 /**
 * Default Contructor.
