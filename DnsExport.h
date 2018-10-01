@@ -17,10 +17,11 @@ class DnsExport {
         DnsExport();
         ~DnsExport();
 
-        std::string pcap_file = "";       ///< name of the pcap file
-        struct AddressWrapper syslog_server_addr; ///< ipv4/ipv6/hostname of syslog server
-        struct AddressWrapper interface_addr;   ///< name of the network interface
-        double time_in_second = 60;       ///< calculation time of statistics
+        std::vector<std::string> pcap_files;
+        std::vector<struct AddressWrapper> syslog_server_addr;
+        struct AddressWrapper interface_addr;
+        std::string interface_name;
+        double time_in_seconds = 60;
 
         void run(int argc, char **argv);
 };
