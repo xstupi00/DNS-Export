@@ -134,7 +134,7 @@ bool ArgumentParser::is_interface_online(std::string interface)
     if (ioctl(sock, SIOCGIFFLAGS, &ifr) < 0) {
         perror("SIOCGIFFLAGS");
     }
-    close(sock);
+    // close(sock);
     if (!!(ifr.ifr_flags & IFF_RUNNING)) {
         this->get_interface_addr(interface);
         return true;

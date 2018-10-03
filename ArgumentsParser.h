@@ -4,10 +4,10 @@
 #include <getopt.h>
 #include <cstring>
 #include <cstdlib>
-#include <stdio.h>
+#include <cstdio>
 #include <sys/types.h>
 #include <ifaddrs.h>
-#include <string.h>
+#include <cstring>
 #include <arpa/inet.h> //
 #include <sys/stat.h>
 #include <iostream>
