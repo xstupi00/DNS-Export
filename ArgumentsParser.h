@@ -1,25 +1,16 @@
 #ifndef ARGUMENTSPARSER_H
 #define ARGUMENTSPARSER_H
 
+#include <arpa/inet.h>
+#include <cstring>
 #include <getopt.h>
-#include <cstring>
-#include <cstdlib>
-#include <cstdio>
-#include <sys/types.h>
 #include <ifaddrs.h>
-#include <cstring>
-#include <arpa/inet.h> //
-#include <sys/stat.h>
 #include <iostream>
-#include <netinet/in.h> //
-#include <sys/socket.h> //
-#include <netdb.h> //
-#include <string>
-#include <vector>
-#include <sstream>
-#include <sys/ioctl.h>
+#include <netdb.h>
 #include <net/if.h>
-
+#include <string>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
 
 #include "DnsExport.h"
 
@@ -33,17 +24,17 @@ class ArgumentParser: public DnsExport
         ~ArgumentParser();
 
         void parse_arguments(int argc, char**argv);
+        void print_arguments();
 
-    private:
-        void file_proccessing(const std::string& file_name);
-        struct AddressWrapper syslog_address_proccessing(const std::string& addr);
-        bool is_interface_online(std::string interface);
+private:
+        bool proccess_duplicate_interface(std::string interface);
+        bool proccess_duplicate_timeout(double time_in_seconds);
+        void proccess_file_argument(const std::string& file_name);
         void get_interface_addr(std::string interface);
         void get_IPv4_elements(std::vector<struct sockaddr_in> vector_IPv4);
         void get_IPv6_elements(std::vector<struct sockaddr_in6> vector_IPv6);
-        bool duplicate_interface(std::string interface);
-        bool duplicate_timeout(double time_in_seconds);
-        void print_arguments();
+        bool is_interface_online(std::string interface);
+        struct AddressWrapper proccess_syslog_address(const std::string& addr);
 };
 
 

@@ -1,3 +1,9 @@
+#define DNS_ANS_TYPE_A     1
+#define DNS_ANS_TYPE_CNAME 5
+#define DNS_ANS_TYPE_MX 15
+#define DNS_ANS_TYPE_AAAA 28
+
+
 /**
  * @brief           The structure contains all needed flags and other items for
  *                  creating the head of DNS messages for communication
@@ -24,21 +30,30 @@ struct DNS_HEADER {
     unsigned short ARCOUNT;     ///< number of resource records in the additional records section
 };
 
+/**
+ * @brief           The structure for definition the Question format used to
+ *                  carry the "question" in most queries.
+ */
+struct QUESTION_FORMAT {
+
+    unsigned short QTYPE;       ///< two octet code which specifies the type of the query
+    unsigned short QCLASS;      ///< two octet code that specifies the class of the query
+};
+
 
 /* Constant sized fields of query structure */
-#pragma pack(push, 1)
+//#pragma pack(push, 1)
 /**
  * @brief           The structure for Resource record format. All sections
  *                  (answer, authority, additional) share the same format.
  */
 struct RESOURCE_FORMAT {
-
     unsigned short TYPE;        ///< two octets containing one of the RR type codes
     unsigned short CLASS;       ///< two octets which specify the class of the data in the RDATA field
     unsigned int TTL;           ///< a 32 bit unsigned integer that specifies the time interval (in seconds)
     unsigned short RDLENGTH;    ///< 16 bit integer that specifies the length in octets of the RDATA field
 };
-#pragma pack(pop)
+//#pragma pack(pop)
 
 
 /**

@@ -1,6 +1,5 @@
 #include "ArgumentsParser.h"
 
-using namespace std;
 
 /**
 * Default Contructor.
@@ -39,19 +38,19 @@ void ArgumentParser::get_IPv6_elements(std::vector<struct sockaddr_in6> vector_I
 }
 
 
-void ArgumentParser::file_proccessing(const std::string& file_name)
+void ArgumentParser::proccess_file_argument(const std::string& file_name)
 {
     std::string delimiter = ".";
     std::string token = file_name.substr(file_name.find_first_of(delimiter), file_name.find(delimiter));
     struct stat buffer;
-    if (stat (file_name.c_str(), &buffer) == 0 && token == ".pcap") {
+    if (stat (file_name.c_str(), &buffer) == 0) {
         this->pcap_files.emplace_back(std::string(optarg));
     } else {
         std::cerr << "Invalid pcap file: " << file_name << endl;
     }
 }
 
-struct AddressWrapper ArgumentParser::syslog_address_proccessing(const std::string& addr)
+struct AddressWrapper ArgumentParser::proccess_syslog_address(const std::string& addr)
 {
     struct addrinfo hint, *res;
     memset(&hint, '\0', sizeof hint);
@@ -178,7 +177,7 @@ void ArgumentParser::get_interface_addr(std::string interface)
     freeifaddrs(ifAddrStruct);
 }
 
-bool ArgumentParser::duplicate_interface(std::string interface)
+bool ArgumentParser::proccess_duplicate_interface(std::string interface)
 {
     if (this->interface_name == interface)
         return false;
@@ -197,7 +196,7 @@ bool ArgumentParser::duplicate_interface(std::string interface)
     return false;
 }
 
-bool ArgumentParser::duplicate_timeout(double time_in_seconds)
+bool ArgumentParser::proccess_duplicate_timeout(double time_in_seconds)
 {
     std::cout << "Do you want replace actual value of TIMEOUT " << this->time_in_seconds <<\
     " by new value: " << time_in_seconds << "?" << endl;
@@ -257,11 +256,11 @@ void ArgumentParser::parse_arguments(int argc, char **argv)
                 break;
             }
             case 'r': {
-                this->file_proccessing(optarg);
+                this->proccess_file_argument(optarg);
                 break;
             }
             case 'i': {
-                if (duplicity_interface && !this->duplicate_interface(std::string(optarg)))
+                if (duplicity_interface && !this->proccess_duplicate_interface(std::string(optarg)))
                     break;
                 this->is_interface_online(std::string(optarg));
                 duplicity_interface = true;
@@ -269,14 +268,14 @@ void ArgumentParser::parse_arguments(int argc, char **argv)
             }
             case 's': {
                 struct AddressWrapper syslog_server;
-                syslog_server = this->syslog_address_proccessing(optarg);
+                syslog_server = this->proccess_syslog_address(optarg);
                 this->syslog_server_addr.push_back(syslog_server);
                 break;
             }
             case 't': {
-                if (duplicity_timeout && !this->duplicate_timeout(std::stod(optarg)))
+                if (duplicity_timeout && !this->proccess_duplicate_timeout(std::stod(optarg)))
                     break;
-                this->time_in_seconds = std::stod(optarg);
+                this->time_in_seconds = std::atoi(optarg);
                 duplicity_timeout = true;
                 break;
             }
@@ -286,5 +285,4 @@ void ArgumentParser::parse_arguments(int argc, char **argv)
             }
         }
     }
-    this->print_arguments();
 }

@@ -1,6 +1,5 @@
 #include <iostream>
 #include <csignal>
-#include <unistd.h>
 
 #include "DnsExport.h"
 
