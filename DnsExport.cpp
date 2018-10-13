@@ -51,7 +51,7 @@ u_char* DnsExport::read_name(unsigned char *reader, unsigned char *buffer, int *
     // read the names in 3www6google3com format
     while (*reader) {
         if (*reader >= 192) {
-            offset = (*reader) * 256 + *(reader + 1) - 49152 + 2; //49152 = 11000000 00000000 ;)
+            offset = (*reader) * 256 + *(reader + 1) - 49152; //49152 = 11000000 00000000 ;)
             reader = buffer + offset - 1;
             jumped = 1; // we have jumped to another location so counting wont go up!
         } else {
@@ -186,7 +186,6 @@ u_char* DnsExport::parse_transport_protocol(const unsigned char* packet, unsigne
         if (ntohs(udpHeader->source) == PORT_DNS_NUMBER) {
             payload = (u_char *) (packet + sizeof(struct ether_header) + offset + sizeof(struct udphdr));
         }
-        //return(0); // stop udp
     }
 
 
@@ -256,7 +255,8 @@ char* DnsExport::transform_utc_time(const uint32_t utc_time)
 }
 
 
-void DnsExport::decode_dns_record(int record_type, int* record_length, u_char* record_payload, u_char* buffer) {
+std::string DnsExport::decode_dns_record(int record_type, int data_length, int* record_length, u_char* record_payload, u_char* buffer) {
+    std::stringstream result;
     record_payload -= sizeof(unsigned short);
     switch (record_type) {
         case DNS_ANS_TYPE_A: {
@@ -264,7 +264,9 @@ void DnsExport::decode_dns_record(int record_type, int* record_length, u_char* r
             memcpy(&addr, record_payload, sizeof(addr));
             char addr_IPv4[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, &addr, addr_IPv4, INET_ADDRSTRLEN);
-            std::cout << " Data (IPv4): " << inet_ntoa(addr) << endl;
+
+            result << "A " << addr_IPv4;
+            //std::cout << " Data (IPv4): " << result.str() << endl;
             break;
         }
         case DNS_ANS_TYPE_AAAA: {
@@ -272,13 +274,17 @@ void DnsExport::decode_dns_record(int record_type, int* record_length, u_char* r
             memcpy(&addr, record_payload, sizeof(addr));
             char addr_IPv6[INET6_ADDRSTRLEN];
             inet_ntop(AF_INET6, &addr, addr_IPv6, INET6_ADDRSTRLEN);
-            std::cout << " Data (IPv6): " << addr_IPv6 << endl;
+
+            result << "AAAA " << addr_IPv6;
+            //std::cout << " Data (IPv6): " << result.str() << endl;
             break;
         }
         case DNS_ANS_TYPE_MX: {
             struct ns_preference* preference= (struct ns_preference*) record_payload;
-            std::cout <<" Data (MX) " << ntohs(preference->preference) << " " <<\
-             this->read_name(record_payload+ sizeof(uint16_t), buffer, record_length) << endl;
+            char* mx_name = (char*) this->read_name(record_payload+ sizeof(uint16_t), buffer, record_length);
+
+            result << "MX " << preference->preference << " " << mx_name;
+            //std::cout <<" Data (MX) " << result.str() << endl;
             break;
         }
         case DNS_ANS_TYPE_SOA: {
@@ -288,9 +294,10 @@ void DnsExport::decode_dns_record(int record_type, int* record_length, u_char* r
             u_char* responsible_auth_mail = this->read_name(record_payload, buffer, &offset);
             record_payload += offset;
             struct soa_record* soa = (struct soa_record*) record_payload;
-            std::cout <<" Data (SOA) " << primary_name_server << " " << responsible_auth_mail << " " <<\
-            htonl(soa->serial) << " " << htonl(soa->refresh) << " " << htonl(soa->retry) << " " <<\
-            htonl(soa->expire) << " " << htonl(soa->min_ttl) << endl;
+
+            result << "SOA " << primary_name_server << " " << responsible_auth_mail << " " << htonl(soa->serial) <<\
+            " " << htonl(soa->refresh) << " " << htonl(soa->retry) << " " << htonl(soa->expire) << " " << htonl(soa->min_ttl);
+            //std::cout <<" Data (SOA) " << result.str() << endl;
             break;
         }
         case DNS_ANS_TYPE_RRSIG: {
@@ -299,46 +306,113 @@ void DnsExport::decode_dns_record(int record_type, int* record_length, u_char* r
             int offset = 0;
             u_char* signers_name = this->read_name(record_payload, buffer, &offset);
             record_payload += offset;
-            char signature[128];
+            char signature[data_length-sizeof(struct rrsig_record)-offset];
             memcpy(&signature, record_payload, sizeof(signature));
 
-            for (unsigned i = 0; i < sizeof(signature); i++) {
-                if(i % 8 == 0 && i != 0) std::cout << ' ';
-                if(i % 16 == 0 && i != 0) std::cout << endl;
-                std::cout << std::hex << setw(2) << (unsigned short)((signature[i] & 0xFF)) << " ";
-            }
-            std::cout << std::dec << endl;
+            result << "RRSIG " << ntohs(rrsig->type_covered) << " " << int(rrsig->algorithm) << " " <<\
+            int(rrsig->labels) <<" " << ntohl(rrsig->orig_ttl) << " " << this->transform_utc_time(ntohl(\
+            rrsig->signature_exp)) << " " << this->transform_utc_time(ntohl(rrsig->signature_inc)) << " " <<\
+            ntohs(rrsig->key_tag) << " " << signers_name << " (" << endl;
 
-            std::cout << " Data (RRSIG) "<< ntohs(rrsig->type_covered) << " " << int(rrsig->algorithm) << " " <<\
-            int(rrsig->labels) << " " << ntohl(rrsig->orig_ttl) << " " <<\
-            this->transform_utc_time(ntohl(rrsig->signature_exp)) <<\
-            " " << this->transform_utc_time(ntohl(rrsig->signature_inc)) << " " <<\
-            ntohs(rrsig->key_tag) << " " << signers_name << endl;
+            for (unsigned i = 0; i < sizeof(signature); i++) {
+                result << std::hex << (unsigned short)((signature[i] & 0xFF));
+            }
+            result << std::dec << endl << ")";
+
+            //std::cout << " Data (RRSIG) "<< result.str() << endl;
             break;
         }
         case DNS_ANS_TYPE_DS: {
             struct ds_record* ds = (struct ds_record*) record_payload;
             record_payload += sizeof(ds_record);
-            char digest[32];
+            char digest[data_length-sizeof(struct ds_record)];
             memcpy(&digest, record_payload, sizeof(digest));
-            for (unsigned i = 0; i < sizeof(digest); i++) {
-                if(i % 8 == 0 && i != 0) std::cout << ' ';
-                if(i % 16 == 0 && i != 0) std::cout << endl;
-                std::cout << std::hex << setw(2) << (unsigned short)((digest[i] & 0xFF)) << " ";
-            }
-            std::cout << std::dec << endl;
 
-            std::cout << " Data (DS) " << ntohs(ds->key_id) << " " << int(ds->algorithm) <<\
-             " " << int(ds->digest_type) << endl;
+            result << "DS "<<  ntohs(ds->key_id) << " " << int(ds->algorithm) << " " << int(ds->digest_type) << " (" << endl;
+
+            for (unsigned i = 0; i < sizeof(digest); i++) {
+                result << std::hex << (unsigned short)((digest[i] & 0xFF));
+            }
+            result << std::dec << endl << ")";
+
+            //std::cout << " Data (DS) " << result.str() << endl;
             break;
         }
         case DNS_ANS_TYPE_NSEC: {
             int offset = 0;
             u_char *domain_name = this->read_name(record_payload, buffer, &offset);
             record_payload += offset;
-            std::cout << " Data (NSEC) " << domain_name;
+
             struct nsec_record *nsec = (struct nsec_record *) record_payload;
-            std::cout << " BYTES: " << ntohs(nsec->bit_maps_count) << " ";
+            record_payload += sizeof(nsec_record);
+
+            std::vector<int> rr_indexes;
+            for (unsigned i = 0; i < ntohs(nsec->bit_maps_count); i++) {
+                uint8_t byte_map;
+                memcpy(&byte_map, record_payload, sizeof(byte_map));
+
+                byte_map = ((byte_map * 0x0802LU & 0x22110LU) | (byte_map * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16;
+                for (unsigned j = 0; j < 8; j++) {
+                    if ((byte_map >> j) & 1) {
+                        rr_indexes.push_back(i*8+j);
+                    }
+                }
+                record_payload += sizeof(byte_map);
+            }
+
+            result << "NSEC " << domain_name << " ";
+            for (unsigned int i = 0; i < rr_indexes.size(); i++) {
+                result << decode_rr_type(rr_indexes.at(i)) << " ";
+            }
+
+            //std::cout << " Data (NSEC) " << result.str() << endl;
+            break;
+        }
+        case DNS_ANS_TYPE_DNSKEY: {
+            struct dnskey_record* dnskey = (struct dnskey_record*) record_payload;
+            record_payload += sizeof(ds_record);
+            char public_key[data_length- sizeof(dnskey_record)];
+            memcpy(&public_key, record_payload, sizeof(public_key));
+
+            result << "DNSKEY " << (int)dnskey->zone_key  << " " << (int)dnskey->key_revoked << " " <<\
+            (int)dnskey->key_signining << " " << (int)dnskey->a1 << (int)dnskey->a2 << " " << (int)dnskey->protocol <<\
+            " " << (int)dnskey->algorithm << " (" << endl;
+
+            for (unsigned i = 0; i < sizeof(public_key); i++) {
+                result << std::hex << (unsigned short)((public_key[i] & 0xFF));
+            }
+            result << std::dec << endl << ")";
+
+            //std::cout << " Data (DNSKEY) " << result.str() << endl;
+            break;
+        }
+        case DNS_ANS_TYPE_NSEC3: {
+            struct nsec3_record* nsec3 = (struct nsec3_record*) record_payload;
+            record_payload += sizeof(struct nsec3_record) - sizeof(unsigned char);
+            result << "NSEC3 " << int(nsec3->algorithm) << " " << int(nsec3->opt_out) << " " << int(nsec3->reserverd)\
+            << " " << ntohs(nsec3->iterations) << " " << int(nsec3->salt_length) << " ( ";
+
+            char salt[int(nsec3->salt_length)];
+            memcpy(&salt, record_payload, sizeof(salt));
+            record_payload += int(nsec3->salt_length);
+            for (unsigned i = 0; i < sizeof(salt); i++) {
+                result << std::hex << (unsigned short)((salt[i] & 0xFF));
+            }
+
+            uint8_t hash_length;
+            memcpy(&hash_length, record_payload, sizeof(uint8_t));
+            record_payload += sizeof(unsigned char);
+            result << std::dec << " ) " <<  endl << int(hash_length) << " ( ";
+
+            char owner_name[int(hash_length)];
+            memcpy(&owner_name, record_payload, sizeof(salt));
+            record_payload += int(hash_length);
+            for (unsigned i = 0; i < sizeof(owner_name); i++) {
+                result << std::hex << (unsigned short)((owner_name[i] & 0xFF));
+            }
+            result << std::dec << " )" << endl;
+
+            struct nsec_record *nsec = (struct nsec_record *) record_payload;
             record_payload += sizeof(nsec_record);
 
             std::vector<int> rr_indexes;
@@ -356,50 +430,94 @@ void DnsExport::decode_dns_record(int record_type, int* record_length, u_char* r
             }
 
             for (unsigned int i = 0; i < rr_indexes.size(); i++) {
-                std::cout << decode_rr_type(rr_indexes.at(i)) <<" ";
+                result << decode_rr_type(rr_indexes.at(i)) << " ";
             }
-            std::cout << endl;
+
+            //std::cout << " Data (NSEC3) " << result.str() << endl;
             break;
         }
-        case DNS_ANS_TYPE_DNSKEY: {
-            struct dnskey_record* dnskey = (struct dnskey_record*) record_payload;
-            std::cout << "--------------------------------------------" << endl;
-            std::cout << " Data (DNSKEY) ";
+        case DNS_ANS_TYPE_NSEC3PARAM: {
+            struct nsec3_record* nsec3 = (struct nsec3_record*) record_payload;
+            record_payload += sizeof(struct nsec3_record) - sizeof(unsigned char);
+            result << "NSEC3PARAM " << int(nsec3->algorithm) << " " << int(nsec3->opt_out) << " " << int(nsec3->reserverd)\
+            << " " << ntohs(nsec3->iterations) << " " << int(nsec3->salt_length) << " ( ";
+
+            char salt[int(nsec3->salt_length)];
+            memcpy(&salt, record_payload, sizeof(salt));
+            record_payload += int(nsec3->salt_length);
+            for (unsigned i = 0; i < sizeof(salt); i++) {
+                result << std::hex << (unsigned short)((salt[i] & 0xFF));
+            }
+            result << std::dec << " ) " << endl;
+
+            //std::cout << " Data (NSEC3PARAM) " << result.str() << endl;
+            break;
+        }
+        case DNS_ANS_TYPE_NS: {
+            result << "NS " << this->read_name(record_payload, buffer, record_length);
+            break;
+        }
+        case DNS_ANS_TYPE_CNAME: {
+            result << "CNAME " << this->read_name(record_payload, buffer, record_length);
+            break;
+        }
+        case DNS_ANS_TYPE_PTR: {
+            result << "PTR " << this->read_name(record_payload, buffer, record_length);
             break;
         }
         default: {
-            std::cout << " Data (" << record_type << ") " << this->read_name(record_payload, buffer, record_length) << endl;
+            result << record_type;
             break;
         }
     }
+    return result.str();
 }
 
-void DnsExport::parse_payload(u_char* payload) {
+
+void DnsExport::parse_payload(u_char* payload, bool tcp) {
+    if (tcp) {
+        payload += sizeof(unsigned short);  // length field
+    }
+
     const struct DNS_HEADER *dns_header = (struct DNS_HEADER *) payload;
     u_char* buffer = payload;
+    unsigned char *qname;
 
     int end = 0;
     if (dns_header->QR == 1 && ntohs(dns_header->RCODE) == 0 && ntohs(dns_header->ANCOUNT) > 0) {
         payload += sizeof(struct DNS_HEADER);
         for (unsigned i  = 0; i < ntohs(dns_header->QDCOUNT); i++) {
-            std::cout << "Correct Answer ";
-            unsigned char *qname = this->read_name(payload, buffer, &end);
-            std::cout << "NAME: " << qname;
+            //std::cout << "Correct Answer ";
+            qname = this->read_name(payload, buffer, &end);
+            //std::cout << "NAME: " << qname;
             payload += end;
             struct QUESTION_FORMAT *question_format = (struct QUESTION_FORMAT *) (payload);
-            std::cout << " TYPE=" << ntohs(question_format->QTYPE) << " CLASS=" << ntohs(question_format->QCLASS)
+            //std::cout << " TYPE=" << ntohs(question_format->QTYPE) << " CLASS=" << ntohs(question_format->QCLASS)\
                       << endl;
             payload += sizeof(struct QUESTION_FORMAT);
         }
 
         for (unsigned i = 0; i < ntohs(dns_header->ANCOUNT); i++) {
-            std::cout << "NAME=" << this->read_name(payload, buffer, &end);
+            //std::cout << "NAME=" << this->read_name(payload, buffer, &end);
+            this->read_name(payload, buffer, &end);
             payload += end;
             struct RESOURCE_FORMAT *resource_format = (struct RESOURCE_FORMAT *) (payload);
-            std::cout << " TYPE=" << ntohs(resource_format->TYPE) << " CLASS=" << ntohs(resource_format->CLASS) << \
+            //std::cout << " TYPE=" << ntohs(resource_format->TYPE) << " CLASS=" << ntohs(resource_format->CLASS) << \
                  " TTL=" << ntohl(resource_format->TTL) << " RDLENGTH=" << ntohs(resource_format->RDLENGTH) << endl;
 
-            this->decode_dns_record(ntohs(resource_format->TYPE), &end, payload+sizeof(struct RESOURCE_FORMAT), buffer);
+            std::string result = this->decode_dns_record(ntohs(resource_format->TYPE), ntohs(resource_format->RDLENGTH), &end, payload+sizeof(struct RESOURCE_FORMAT), buffer);
+
+            std::stringstream tmp;
+            tmp << qname << " ";
+            result.insert(0, tmp.str());
+
+            auto iter = this->stats.find(result);
+            if (iter != this->stats.end()) {
+                iter->second++;
+            } else {
+                this->stats.insert(std::make_pair<std::string, int>(result.c_str(), 1));
+            }
+
             payload += sizeof(struct RESOURCE_FORMAT) + ntohs(resource_format->RDLENGTH) - sizeof(unsigned short);
         }
     }
@@ -407,63 +525,12 @@ void DnsExport::parse_payload(u_char* payload) {
 
 void DnsExport::proccess_tcp_packets() {
 
-    //for (unsigned i = 0; i < this->tcp_packets.size(); i++) {
     TCPReassembler tcp_reassembler;
     this->tcp_packets = tcp_reassembler.reassembling_packets(this->tcp_packets);
-    /*for (unsigned i = 4; i < 5; i++) {
-        //for (unsigned i = 0; i < sizeof(tcp); i++) {
-        //    if(i % 8 == 0 && i != 0) std::cout << ' ';
-        //    if(i % 16 == 0 && i != 0) std::cout << endl;
-
-        const struct ether_header* ethernetHeader = (struct ether_header*)this->tcp_packets[i];
-
-        if (ntohs(ethernetHeader->ether_type) == ETHERTYPE_IP) {
-            std::cout << "ETHERNET" << endl;
-        }
-
-        //std::cout << "ETHETNER = " << ntohs(ethernetHeader->ether_type) << endl;
-
-        const struct ip* ipHeader = (struct ip*)(this->tcp_packets[i] + sizeof(struct ether_header));
-
-        if (ipHeader->ip_hl*4 < IP_HEADER_MIN_LEN || ipHeader->ip_hl*4 > IP_HEADER_MAX_LEN) {
-            std::cerr << "Invalid IP header length: " << ipHeader->ip_hl*4 << "bytes" << endl;
-        }
-
-        if (ipHeader->ip_p == IPPROTO_TCP) {
-            const struct tcphdr *tcpHeader = (tcphdr *) (this->tcp_packets[i] + sizeof(struct ether_header) + ipHeader->ip_hl*4);
-            if (tcpHeader->th_off * 4 < 20) {
-                std::cerr << "Invalid TCP header length: " << tcpHeader->th_off * 4 << "bytes" << endl;
-            }
-
-            std::cout << "PORT = " << ntohs(tcpHeader->th_sport) << endl;
-
-            if (ntohs(tcpHeader->th_sport) == PORT_DNS_NUMBER) {
-                std::cout << "DNS" << endl;
-            }
-        }
-
-
-        std::cout << std::hex << setw(2) << (unsigned short)(this->tcp_packets[i][2964] & 0xFF) << endl;
-        //std::cout << std::dec << endl;
-    }*/
-
     for (unsigned i = 0; i < this->tcp_packets.size(); i++) {
         u_char *payload = this->my_pcap_handler(this->tcp_packets[i], true);
             if (payload) {
-                this->parse_payload(payload);
+                this->parse_payload(payload, true);
             }
     }
-
-    /*unsigned cnt = 0;
-    std::cout << std::hex << cnt;
-    cnt = cnt+2;
-    unsigned j = 0;
-    for (unsigned i = 66; i < 3297; i++) {
-        if(j % 8 == 0 && j != 0) std::cout << ' ';
-        if(j % 16 == 0 && j != 0){ std::cout << endl;
-        std::cout << std::hex << cnt << "   ";}
-        std::cout << std::hex << setw(2) << (unsigned short)((tcp_packets.at(4)[i] & 0xFF)) << " ";
-        cnt+=1; j++;
-    }
-    std::cout << std::dec << endl;*/
 }

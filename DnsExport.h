@@ -5,6 +5,7 @@
 #include <vector>
 #include <netinet/ip6.h>
 #include <ctime>
+#include <unordered_map>
 
 #include "DataStructures.h"
 
@@ -29,6 +30,7 @@ public:
     std::string interface_name;
     int time_in_seconds = 60;
     std::vector<const unsigned char*> tcp_packets;
+    std::unordered_map<std::string, int> stats;
 
 
     void run(int argc, char **argv);
@@ -37,9 +39,9 @@ public:
 
     u_char *read_name(unsigned char *reader, unsigned char *buffer, int *count);
 
-    void parse_payload(u_char *payload);
+    void parse_payload(u_char *payload, bool tcp);
 
-    void decode_dns_record(int record_type, int *record_length, u_char *record_payload, u_char *buffer);
+    std::string decode_dns_record(int record_type, int data_length, int *record_length, u_char *record_payload, u_char *buffer);
 
     uint8_t proccess_next_header(const unsigned char* ipv6_header, uint8_t* next_header, unsigned* offset);
 

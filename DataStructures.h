@@ -1,14 +1,21 @@
-#define DNS_ANS_TYPE_A     1
-#define DNS_ANS_TYPE_NS     2
-#define DNS_ANS_TYPE_CNAME 5
-#define DNS_ANS_TYPE_SOA 6
-#define DNS_ANS_TYPE_PTR 12
-#define DNS_ANS_TYPE_MX 15
-#define DNS_ANS_TYPE_AAAA 28
-#define DNS_ANS_TYPE_DS 43
-#define DNS_ANS_TYPE_RRSIG 46
-#define DNS_ANS_TYPE_NSEC 47
-#define DNS_ANS_TYPE_DNSKEY 48
+#define DNS_ANS_TYPE_A          1
+#define DNS_ANS_TYPE_NS         2
+#define DNS_ANS_TYPE_CNAME      5
+#define DNS_ANS_TYPE_SOA        6
+#define DNS_ANS_TYPE_PTR        12
+#define DNS_ANS_TYPE_MX         15
+#define DNS_ANS_TYPE_AAAA       28
+#define DNS_ANS_TYPE_DS         43
+#define DNS_ANS_TYPE_RRSIG      46
+#define DNS_ANS_TYPE_NSEC       47
+#define DNS_ANS_TYPE_DNSKEY     48
+#define DNS_ANS_TYPE_NSEC3      50
+#define DNS_ANS_TYPE_NSEC3PARAM 51
+
+#define DNS_ANS_TYPE_TXT        16
+#define DNS_ANS_TYPE_SPF        99
+#define DNS_ANS_TYPE_SRV        33
+
 
 #define NEXTHDR_HOP		    0	/* Hop-by-hop option header. */
 #define NEXTHDR_IPV6		41	/* IPv6 in IPv6 */
@@ -120,9 +127,23 @@ struct nsec_record
     uint16_t bit_maps_count;
 };
 
+struct nsec3_record
+{
+    uint8_t algorithm;
+    unsigned char opt_out :1;
+    unsigned char reserverd :7;
+    uint16_t iterations;
+    uint8_t salt_length;
+};
+
 struct dnskey_record
 {
-    uint16_t flags;
+    unsigned char zone_key :1;
+    unsigned char a1 :7;
+    unsigned char a2 :6;
+    unsigned char key_revoked :1;
+    unsigned char key_signining :1;
+
     uint8_t protocol;
     uint8_t algorithm;
 };
@@ -133,7 +154,7 @@ struct dnskey_record
  *                  with the DNS server.
  */
 struct DNS_HEADER {
-    unsigned short length; ///< tcp temporary
+    //unsigned short length; ///< tcp temporary
 
     unsigned short ID;          ///< 16 bit identifier assigned by the program
 
