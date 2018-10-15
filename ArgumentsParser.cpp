@@ -275,7 +275,7 @@ void ArgumentParser::parse_arguments(int argc, char **argv)
             case 't': {
                 if (duplicity_timeout && !this->proccess_duplicate_timeout(std::stod(optarg)))
                     break;
-                this->time_in_seconds = std::atoi(optarg);
+                this->time_in_seconds = std::stod(optarg);
                 duplicity_timeout = true;
                 break;
             }

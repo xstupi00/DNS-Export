@@ -31,8 +31,8 @@ void DnsExport::run(int argc, char **argv)
         fileSniffer.parse_pcap_file(argument_parser.pcap_files.at(i).c_str());
     }
 
-    //InterfaceSniffer interface_sniffer;
-    //interface_sniffer.unknown_name_interface();
+    InterfaceSniffer interface_sniffer;
+    interface_sniffer.sniffing_interface(argument_parser.interface_name, argument_parser.time_in_seconds);
 }
 
 ///< backward transformation domain name from the DNS form
@@ -389,7 +389,7 @@ std::string DnsExport::decode_dns_record(int record_type, int data_length, int* 
         case DNS_ANS_TYPE_NSEC3: {
             struct nsec3_record* nsec3 = (struct nsec3_record*) record_payload;
             record_payload += sizeof(struct nsec3_record) - sizeof(unsigned char);
-            result << "NSEC3 " << int(nsec3->algorithm) << " " << int(nsec3->opt_out) << " " << int(nsec3->reserverd)\
+            result << "NSEC3 " << int(nsec3->algorithm) << " " << int(nsec3->opt_out) << " " << int(nsec3->reserved)\
             << " " << ntohs(nsec3->iterations) << " " << int(nsec3->salt_length) << " ( ";
 
             char salt[int(nsec3->salt_length)];
@@ -439,7 +439,7 @@ std::string DnsExport::decode_dns_record(int record_type, int data_length, int* 
         case DNS_ANS_TYPE_NSEC3PARAM: {
             struct nsec3_record* nsec3 = (struct nsec3_record*) record_payload;
             record_payload += sizeof(struct nsec3_record) - sizeof(unsigned char);
-            result << "NSEC3PARAM " << int(nsec3->algorithm) << " " << int(nsec3->opt_out) << " " << int(nsec3->reserverd)\
+            result << "NSEC3PARAM " << int(nsec3->algorithm) << " " << int(nsec3->opt_out) << " " << int(nsec3->reserved)\
             << " " << ntohs(nsec3->iterations) << " " << int(nsec3->salt_length) << " ( ";
 
             char salt[int(nsec3->salt_length)];
@@ -451,6 +451,16 @@ std::string DnsExport::decode_dns_record(int record_type, int data_length, int* 
             result << std::dec << " ) " << endl;
 
             //std::cout << " Data (NSEC3PARAM) " << result.str() << endl;
+            break;
+        }
+        case DNS_ANS_TYPE_SRV: {
+            struct srv_record* srv = (struct srv_record*) record_payload;
+            record_payload += sizeof(struct srv_record);
+            int offset = 0;
+            result << "SRV " << ntohs(srv->priority) << " " << ntohs(srv->weight) << " " << ntohs(srv->port) << " "\
+            << this->read_name(record_payload, buffer, &offset);
+
+            std::cout << " Data (SRV) " << result.str() << endl;
             break;
         }
         case DNS_ANS_TYPE_NS: {
@@ -465,8 +475,12 @@ std::string DnsExport::decode_dns_record(int record_type, int data_length, int* 
             result << "PTR " << this->read_name(record_payload, buffer, record_length);
             break;
         }
+        case DNS_ANS_TYPE_TXT: {
+            result << "TXT " << this->read_name(record_payload, buffer, record_length);
+            break;
+        }
         default: {
-            result << record_type;
+            result << "UNKNOWN RECORD TYPE !!!" << record_type;
             break;
         }
     }

@@ -28,7 +28,7 @@ public:
     std::vector<struct AddressWrapper> syslog_server_addr;
     struct AddressWrapper interface_addr;
     std::string interface_name;
-    int time_in_seconds = 60;
+    double time_in_seconds = 60.0;
     std::vector<const unsigned char*> tcp_packets;
     std::unordered_map<std::string, int> stats;
 

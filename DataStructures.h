@@ -4,7 +4,9 @@
 #define DNS_ANS_TYPE_SOA        6
 #define DNS_ANS_TYPE_PTR        12
 #define DNS_ANS_TYPE_MX         15
+#define DNS_ANS_TYPE_TXT        16
 #define DNS_ANS_TYPE_AAAA       28
+#define DNS_ANS_TYPE_SRV        33
 #define DNS_ANS_TYPE_DS         43
 #define DNS_ANS_TYPE_RRSIG      46
 #define DNS_ANS_TYPE_NSEC       47
@@ -12,9 +14,7 @@
 #define DNS_ANS_TYPE_NSEC3      50
 #define DNS_ANS_TYPE_NSEC3PARAM 51
 
-#define DNS_ANS_TYPE_TXT        16
 #define DNS_ANS_TYPE_SPF        99
-#define DNS_ANS_TYPE_SRV        33
 
 
 #define NEXTHDR_HOP		    0	/* Hop-by-hop option header. */
@@ -30,12 +30,12 @@
 #define NEXTHDR_SCTP		132	/* SCTP message. */
 #define NEXTHDR_MOBILITY	135	/* Mobility header. */
 
-#define IP_HEADER_MIN_LEN   20
-#define IP_HEADER_MAX_LEN   60
-#define PORT_DNS_NUMBER 53
-#define IPv6_HEADER_LEN 40
-#define EIGHT_OCTET_UNIT_TO_BYTES 3
-#define FOUR_OCTET_UNIT_TO_BYTES 2
+#define IP_HEADER_MIN_LEN           20
+#define IP_HEADER_MAX_LEN           60
+#define PORT_DNS_NUMBER             53
+#define IPv6_HEADER_LEN             40
+#define EIGHT_OCTET_UNIT_TO_BYTES   3
+#define FOUR_OCTET_UNIT_TO_BYTES    2
 
 std::string decode_rr_type(int rr_type);
 
@@ -122,6 +122,13 @@ struct ds_record
     uint8_t digest_type;
 };
 
+struct srv_record
+{
+    uint16_t  priority;
+    uint16_t weight;
+    uint16_t port;
+};
+
 struct nsec_record
 {
     uint16_t bit_maps_count;
@@ -130,20 +137,34 @@ struct nsec_record
 struct nsec3_record
 {
     uint8_t algorithm;
-    unsigned char opt_out :1;
-    unsigned char reserverd :7;
+# if __BYTE_ORDER == __LITTLE_ENDIAN
+    uint8_t opt_out :1;
+    uint8_t reserved :7;
+# endif
+# if __BYTE_ORDER == __BIG_ENDIAN
+    uint8_t reserved :7;
+    uint8_t opt_out :1;
+# endif
     uint16_t iterations;
     uint8_t salt_length;
 };
 
 struct dnskey_record
 {
+# if __BYTE_ORDER == __LITTLE_ENDIAN
     unsigned char zone_key :1;
     unsigned char a1 :7;
     unsigned char a2 :6;
     unsigned char key_revoked :1;
     unsigned char key_signining :1;
-
+# endif
+# if __BYTE_ORDER == __BIG_ENDIAN
+    unsigned char a1 :7;
+    unsigned char zone_key :1;
+    unsigned char key_signining :1;
+    unsigned char key_revoked :1;
+    unsigned char a2 :6;
+# endif
     uint8_t protocol;
     uint8_t algorithm;
 };
@@ -154,20 +175,34 @@ struct dnskey_record
  *                  with the DNS server.
  */
 struct DNS_HEADER {
-    //unsigned short length; ///< tcp temporary
-
     unsigned short ID;          ///< 16 bit identifier assigned by the program
 
-    unsigned char RD :1;        ///< Recursion Desired
-    unsigned char TC :1;        ///< TrunCation
-    unsigned char AA :1;        ///< Authorirative Answer
-    unsigned char OPCODE :4;    ///< 4 bit field that species kind of query
-    unsigned char QR :1;        ///< Query or Response message
-    unsigned char RCODE  :4;    ///< 4 bit field is set as part of responses
-    unsigned char CD :1;        ///< Checking Disabled
-    unsigned char AD :1;        ///< Authenticated Data
-    unsigned char Z  :1;        ///< Reserver for the future use
-    unsigned char RA :1;        ///< Recursion Available
+    # if __BYTE_ORDER == __LITTLE_ENDIAN
+        unsigned char RD :1;        ///< Recursion Desired
+        unsigned char TC :1;        ///< TrunCation
+        unsigned char AA :1;        ///< Authorirative Answer
+        unsigned char OPCODE :4;    ///< 4 bit field that species kind of query
+        unsigned char QR :1;        ///< Query or Response message
+
+        unsigned char RCODE  :4;    ///< 4 bit field is set as part of responses
+        unsigned char CD :1;        ///< Checking Disabled
+        unsigned char AD :1;        ///< Authenticated Data
+        unsigned char Z  :1;        ///< Reserver for the future use
+        unsigned char RA :1;        ///< Recursion Available
+    # endif
+    # if __BYTE_ORDER == __BIG_ENDIAN
+        unsigned char QR :1;        ///< Query or Response message
+        unsigned char OPCODE :4;    ///< 4 bit field that species kind of query
+        unsigned char AA :1;        ///< Authorirative Answer
+        unsigned char TC :1;        ///< TrunCation
+        unsigned char RD :1;        ///< Recursion Desired
+
+        unsigned char RA :1;        ///< Recursion Available
+        unsigned char Z  :1;        ///< Reserver for the future use
+        unsigned char AD :1;        ///< Authenticated Data
+        unsigned char CD :1;        ///< Checking Disabled
+        unsigned char RCODE  :4;    ///< 4 bit field is set as part of responses
+    # endif
 
     unsigned short QDCOUNT;     ///< number of entries in the question section.
     unsigned short ANCOUNT;     ///< number of resource records in the answer section.
@@ -180,14 +215,12 @@ struct DNS_HEADER {
  *                  carry the "question" in most queries.
  */
 struct QUESTION_FORMAT {
-    //unsigned char *NAME;        ///< domain name to which this resource record pertains
     unsigned short QTYPE;       ///< two octet code which specifies the type of the query
     unsigned short QCLASS;      ///< two octet code that specifies the class of the query
 };
 
 
 /* Constant sized fields of query structure */
-//#pragma pack(push, 1)
 /**
  * @brief           The structure for Resource record format. All sections
  *                  (answer, authority, additional) share the same format.
@@ -197,16 +230,4 @@ struct RESOURCE_FORMAT {
     unsigned short CLASS;       ///< two octets which specify the class of the data in the RDATA field
     unsigned int TTL;           ///< a 32 bit unsigned integer that specifies the time interval (in seconds)
     unsigned short RDLENGTH;    ///< 16 bit integer that specifies the length in octets of the RDATA field
-};
-//#pragma pack(pop)
-
-
-/**
- * @brief           The structure for better abstraction resources records.
- *                  Contains individually pointers to contents of records.
- */
-struct DATA_FORMAT {
-    unsigned char *NAME;        ///< domain name to which this resource record pertains
-    struct RESOURCE_FORMAT *RESOURCE; ///< pointer to structure contains needed to processing resource records
-    unsigned char *RDATA;       ///< variable length string of octets that describes the resource
 };
