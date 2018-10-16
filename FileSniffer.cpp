@@ -12,7 +12,7 @@ void FileSniffer::parse_pcap_file(const char *pcap_file_name)
     const unsigned char *packet;
     struct pcap_pkthdr header;
     struct bpf_program fp;		/* The compiled filter expression */
-    char filter_exp[] = "port 53";	/* The filter expression */
+    char filter_exp[] = "src port 53";	/* The filter expression */
 
     /* Open the session in promiscuous mode */
     pcap_t *handle = pcap_open_offline(pcap_file_name, errbuff);
@@ -35,6 +35,7 @@ void FileSniffer::parse_pcap_file(const char *pcap_file_name)
         }
     }
     this->proccess_tcp_packets();
+
 
     for ( auto it = this->stats.begin(); it != this->stats.end(); ++it )
         std::cout << it->first << " " << it->second << endl;

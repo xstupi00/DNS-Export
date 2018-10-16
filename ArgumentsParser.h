@@ -4,36 +4,34 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <getopt.h>
-#include <ifaddrs.h>
 #include <iostream>
 #include <netdb.h>
-#include <net/if.h>
-#include <string>
-#include <sys/ioctl.h>
 #include <sys/stat.h>
+#include <vector>
 
-#include "DnsExport.h"
+#include "DataStructures.h"
 
 using namespace std;
 
 
-class ArgumentParser: public DnsExport
+class ArgumentParser
 {
     public:
         ArgumentParser();
         ~ArgumentParser();
 
+        std::vector<std::string> pcap_files;
+        std::vector<struct AddressWrapper> syslog_server_addr;
+        std::string interface_name;
+        double time_in_seconds = 60.0;
+
         void parse_arguments(int argc, char**argv);
         void print_arguments();
 
-private:
-        bool proccess_duplicate_interface(std::string interface);
-        bool proccess_duplicate_timeout(double time_in_seconds);
+    private:
         void proccess_file_argument(const std::string& file_name);
-        void get_interface_addr(std::string interface);
         void get_IPv4_elements(std::vector<struct sockaddr_in> vector_IPv4);
         void get_IPv6_elements(std::vector<struct sockaddr_in6> vector_IPv6);
-        bool is_interface_online(std::string interface);
         struct AddressWrapper proccess_syslog_address(const std::string& addr);
 };
 

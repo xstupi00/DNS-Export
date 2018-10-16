@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 #include "DataStructures.h"
 
 using namespace std;
@@ -73,5 +74,43 @@ std::string decode_rr_type(int rr_type) {
         case 254: return "MAILA";
         case 255: return "ANY";
         case 65280: return "UNKNOWN";
+        default: return "UNKNOWN";
+    }
+}
+
+std::string decode_algorithm(int algorithm) {
+    if (algorithm >= 17 and algorithm <= 122) {
+        algorithm = 17;
+    }
+
+    if (algorithm >= 123 and algorithm <= 251) {
+        algorithm = 123;
+    }
+
+    switch (algorithm) {
+        case 0: return "DELETE";
+        case 1: return "RSA/MD5";
+        case 2: return "DH";
+        case 3: return "DSA/SHA1";
+        case 4: return "RESERVED";
+        case 5: return "RSA/SHA-1";
+        case 6: return "DSA-NSEC3-SHA1";
+        case 7: return "RSASHA1-NSEC3-SHA1";
+        case 8: return "RSA/SHA-256";
+        case 9: return "RESERVED";
+        case 10: return "RSA/SHA-512";
+        case 11: return "RESERVED";
+        case 12: return "ECC-GOST";
+        case 13: return "ECDSAP256SHA256";
+        case 14: return "ECDSAP384SHA384";
+        case 15: return "ED25519";
+        case 16: return "ED448";
+        case 17: return "UNASSIGNED";
+        case 123: return "RESERVED";
+        case 252: return "INDIRECT";
+        case 253: return "PRIVATEDNS";
+        case 254: return "PRIVATEOID";
+        case 255: return "RESERVED";
+        default: return "UNKNOWN";
     }
 }

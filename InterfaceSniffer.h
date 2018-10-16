@@ -13,7 +13,7 @@
 
 class InterfaceSniffer: public DnsExport {
     public:
-        u_char* sniffing_interface(std::string device_name, double time_in_seconds);
+        void sniffing_interface(std::string device_name, double time_in_seconds);
 
 };
 

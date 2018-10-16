@@ -1,3 +1,5 @@
+#include <vector>
+
 #define DNS_ANS_TYPE_A          1
 #define DNS_ANS_TYPE_NS         2
 #define DNS_ANS_TYPE_CNAME      5
@@ -30,15 +32,19 @@
 #define NEXTHDR_SCTP		132	/* SCTP message. */
 #define NEXTHDR_MOBILITY	135	/* Mobility header. */
 
-#define IP_HEADER_MIN_LEN           20
-#define IP_HEADER_MAX_LEN           60
-#define PORT_DNS_NUMBER             53
-#define IPv6_HEADER_LEN             40
-#define EIGHT_OCTET_UNIT_TO_BYTES   3
 #define FOUR_OCTET_UNIT_TO_BYTES    2
+#define EIGHT_OCTET_UNIT_TO_BYTES   3
+#define IP_HEADER_MIN_LEN           20
+#define IPv6_HEADER_LEN             40
+#define IP_HEADER_MAX_LEN           60
 
 std::string decode_rr_type(int rr_type);
+std::string decode_algorithm(int algorithm);
 
+struct AddressWrapper {
+    std::vector<struct sockaddr_in> addr_IPv4;
+    std::vector<struct sockaddr_in6> addr_IPv6;
+};
 
 
 struct auth_hdr
@@ -104,7 +110,7 @@ struct soa_record
     uint32_t min_ttl;
 };
 
-struct rrsig_record
+struct __attribute__((__packed__)) rrsig_record
 {
     uint16_t  type_covered;
     uint8_t algorithm;
@@ -134,7 +140,7 @@ struct nsec_record
     uint16_t bit_maps_count;
 };
 
-struct nsec3_record
+struct __attribute__((__packed__)) nsec3_record
 {
     uint8_t algorithm;
 # if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -147,23 +153,23 @@ struct nsec3_record
 # endif
     uint16_t iterations;
     uint8_t salt_length;
-};
+}; // +1
 
 struct dnskey_record
 {
 # if __BYTE_ORDER == __LITTLE_ENDIAN
-    unsigned char zone_key :1;
-    unsigned char a1 :7;
-    unsigned char a2 :6;
-    unsigned char key_revoked :1;
-    unsigned char key_signining :1;
+    uint8_t zone_key :1;
+    uint8_t a1 :7;
+    uint8_t a2 :6;
+    uint8_t key_revoked :1;
+    uint8_t key_signining :1;
 # endif
 # if __BYTE_ORDER == __BIG_ENDIAN
-    unsigned char a1 :7;
-    unsigned char zone_key :1;
-    unsigned char key_signining :1;
-    unsigned char key_revoked :1;
-    unsigned char a2 :6;
+    uint8_t a1 :7;
+    uint8_t zone_key :1;
+    uint8_t key_signining :1;
+    uint8_t key_revoked :1;
+    uint8_t a2 :6;
 # endif
     uint8_t protocol;
     uint8_t algorithm;
@@ -174,49 +180,51 @@ struct dnskey_record
  *                  creating the head of DNS messages for communication
  *                  with the DNS server.
  */
-struct DNS_HEADER {
-    unsigned short ID;          ///< 16 bit identifier assigned by the program
+struct DNS_HEADER
+{
+    uint16_t ID;          ///< 16 bit identifier assigned by the program
 
     # if __BYTE_ORDER == __LITTLE_ENDIAN
-        unsigned char RD :1;        ///< Recursion Desired
-        unsigned char TC :1;        ///< TrunCation
-        unsigned char AA :1;        ///< Authorirative Answer
-        unsigned char OPCODE :4;    ///< 4 bit field that species kind of query
-        unsigned char QR :1;        ///< Query or Response message
+        uint8_t RD :1;        ///< Recursion Desired
+        uint8_t TC :1;        ///< TrunCation
+        uint8_t AA :1;        ///< Authorirative Answer
+        uint8_t OPCODE :4;    ///< 4 bit field that species kind of query
+        uint8_t QR :1;        ///< Query or Response message
 
-        unsigned char RCODE  :4;    ///< 4 bit field is set as part of responses
-        unsigned char CD :1;        ///< Checking Disabled
-        unsigned char AD :1;        ///< Authenticated Data
-        unsigned char Z  :1;        ///< Reserver for the future use
-        unsigned char RA :1;        ///< Recursion Available
+        uint8_t RCODE  :4;    ///< 4 bit field is set as part of responses
+        uint8_t CD :1;        ///< Checking Disabled
+        uint8_t AD :1;        ///< Authenticated Data
+        uint8_t Z  :1;        ///< Reserver for the future use
+        uint8_t RA :1;        ///< Recursion Available
     # endif
     # if __BYTE_ORDER == __BIG_ENDIAN
-        unsigned char QR :1;        ///< Query or Response message
-        unsigned char OPCODE :4;    ///< 4 bit field that species kind of query
-        unsigned char AA :1;        ///< Authorirative Answer
-        unsigned char TC :1;        ///< TrunCation
-        unsigned char RD :1;        ///< Recursion Desired
+        uint8_t QR :1;        ///< Query or Response message
+        uint8_t OPCODE :4;    ///< 4 bit field that species kind of query
+        uint8_t AA :1;        ///< Authorirative Answer
+        uint8_t TC :1;        ///< TrunCation
+        uint8_t RD :1;        ///< Recursion Desired
 
-        unsigned char RA :1;        ///< Recursion Available
-        unsigned char Z  :1;        ///< Reserver for the future use
-        unsigned char AD :1;        ///< Authenticated Data
-        unsigned char CD :1;        ///< Checking Disabled
-        unsigned char RCODE  :4;    ///< 4 bit field is set as part of responses
+        uint8_t RA :1;        ///< Recursion Available
+        uint8_t Z  :1;        ///< Reserver for the future use
+        uint8_t AD :1;        ///< Authenticated Data
+        uint8_t CD :1;        ///< Checking Disabled
+        uint8_t RCODE  :4;    ///< 4 bit field is set as part of responses
     # endif
 
-    unsigned short QDCOUNT;     ///< number of entries in the question section.
-    unsigned short ANCOUNT;     ///< number of resource records in the answer section.
-    unsigned short NSCOUNT;     ///< number of name server resource records in the authority records section.
-    unsigned short ARCOUNT;     ///< number of resource records in the additional records section
+    uint16_t QDCOUNT;     ///< number of entries in the question section.
+    uint16_t ANCOUNT;     ///< number of resource records in the answer section.
+    uint16_t NSCOUNT;     ///< number of name server resource records in the authority records section.
+    uint16_t ARCOUNT;     ///< number of resource records in the additional records section
 };
 
 /**
  * @brief           The structure for definition the Question format used to
  *                  carry the "question" in most queries.
  */
-struct QUESTION_FORMAT {
-    unsigned short QTYPE;       ///< two octet code which specifies the type of the query
-    unsigned short QCLASS;      ///< two octet code that specifies the class of the query
+struct QUESTION_FORMAT
+{
+    uint16_t QTYPE;       ///< two octet code which specifies the type of the query
+    uint16_t QCLASS;      ///< two octet code that specifies the class of the query
 };
 
 
@@ -225,9 +233,10 @@ struct QUESTION_FORMAT {
  * @brief           The structure for Resource record format. All sections
  *                  (answer, authority, additional) share the same format.
  */
-struct RESOURCE_FORMAT {
-    unsigned short TYPE;        ///< two octets containing one of the RR type codes
-    unsigned short CLASS;       ///< two octets which specify the class of the data in the RDATA field
-    unsigned int TTL;           ///< a 32 bit unsigned integer that specifies the time interval (in seconds)
-    unsigned short RDLENGTH;    ///< 16 bit integer that specifies the length in octets of the RDATA field
+struct __attribute__((__packed__)) RESOURCE_FORMAT
+{
+    uint16_t TYPE;        ///< two octets containing one of the RR type codes
+    uint16_t CLASS;       ///< two octets which specify the class of the data in the RDATA field
+    uint32_t TTL;           ///< a 32 bit unsigned integer that specifies the time interval (in seconds)
+    uint16_t RDLENGTH;    ///< 16 bit integer that specifies the length in octets of the RDATA field
 };

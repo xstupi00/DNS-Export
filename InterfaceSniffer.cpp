@@ -3,39 +3,30 @@
 #include <unistd.h>
 #include "InterfaceSniffer.h"
 
-u_char* InterfaceSniffer::sniffing_interface(std::string device_name, double time_in_seconds)
+void InterfaceSniffer::sniffing_interface(std::string device_name, double time_in_seconds)
 {
     char errbuf[PCAP_ERRBUF_SIZE];	/* Error string */
     const unsigned char *packet;
     struct pcap_pkthdr header;
     struct bpf_program fp;		/* The compiled filter expression */
-    char filter_exp[] = "port 53";	/* The filter expression */
-    bpf_u_int32 netaddr;            // network address configured at the input device
-    bpf_u_int32 mask;               // network mask of the input device
+    char filter_exp[] = "src port 53";	/* The filter expression */
 
-
-    // get IP address and mask of the sniffing interface
-    if (pcap_lookupnet(device_name.c_str(), &netaddr, &mask, errbuf) == -1) {
-        std::cerr << "pcap_lookupnet() failed" << endl;
-        netaddr = 0;
-        mask = 0;
-    }
 
     /* Open the session in promiscuous mode */
     pcap_t *handle = pcap_open_live(device_name.c_str(), BUFSIZ, 1, -1, errbuf);
     if (handle == nullptr) {
-        fprintf(stderr, "Couldn't open device %s: %s\n", this->interface_name.c_str(), errbuf);
+        fprintf(stderr, "Couldn't open device %s: %s\n", device_name.c_str(), errbuf);
     }
 
     // compile the filter
-    //if (pcap_compile(handle, &fp, filter_exp, 0, netaddr) == -1) {
-    //    std::cerr << "pcap_compile() failed" << endl;
-    //}
+    if (pcap_compile(handle, &fp, filter_exp, 0, PCAP_NETMASK_UNKNOWN) == -1) {
+        std::cerr << "pcap_compile() failed" << endl;
+    }
 
     // set the filter to the packet capture handle
-    //if (pcap_setfilter(handle, &fp) == -1) {
-    //    std::cerr << "pcap_setfilter() failed" << endl;
-    //}
+    if (pcap_setfilter(handle, &fp) == -1) {
+        std::cerr << "pcap_setfilter() failed" << endl;
+    }
 
     time_t start, end;
     double diff = 0;
