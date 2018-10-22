@@ -7,20 +7,18 @@
 
 using namespace std;
 
-void signalHandler( int signum ) {
-    cout << endl <<"Interrupt signal (" << signum << ") received" << endl;
+DnsExport dns_export;
 
-    // cleanup and close up stuff here
-    // terminate program
+void signalHandler(int signum) {
+    std::cout << "Interrupt signal (" << signum << ") received" << endl;
 
-    exit(signum);
+    dns_export.proccess_tcp_packets();
+    for (std::pair<std::string, int> stats_item: dns_export.stats) {
+        std::cout << stats_item.first << " " << stats_item.second << endl;
+    }
 }
 
 int main (int argc, char **argv) {
-    DnsExport dns_export;
+    signal(SIGUSR1, signalHandler);
     dns_export.run(argc, argv);
-    // register signal SIGINT and signal handler
-    // will be changed to SIGUSR1
-    signal(SIGINT, signalHandler);
-    //for(;;) ;
 }

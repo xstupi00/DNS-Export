@@ -2,7 +2,6 @@
 #include <iostream>
 #include "DataStructures.h"
 
-using namespace std;
 
 std::string decode_rr_type(int rr_type) {
     switch (rr_type) {

@@ -16,7 +16,7 @@ ArgumentParser::~ArgumentParser() = default;
 void ArgumentParser::get_IPv4_elements(std::vector<struct sockaddr_in> vector_IPv4)
 {
     char addr_IPv4[INET_ADDRSTRLEN];
-    std::cout << "IPv4 Addresses: " << endl;
+    std::cout << "IPv4 Addresses: " << std::endl;
     for(unsigned int i = 0; i < vector_IPv4.size(); i++) {
         if (inet_ntop(AF_INET, &(vector_IPv4.at(i).sin_addr), addr_IPv4, INET_ADDRSTRLEN) == nullptr)
             perror("inet_ntop");
@@ -29,7 +29,7 @@ void ArgumentParser::get_IPv4_elements(std::vector<struct sockaddr_in> vector_IP
 void ArgumentParser::get_IPv6_elements(std::vector<struct sockaddr_in6> vector_IPv6)
 {
     char addr_IPv6[INET6_ADDRSTRLEN];
-    std::cout << "IPv6 Addresses: " << endl;
+    std::cout << "IPv6 Addresses: " << std::endl;
     for(unsigned int i = 0; i < vector_IPv6.size(); i++) {
         if (inet_ntop(AF_INET6, &(vector_IPv6.at(i).sin6_addr), addr_IPv6, INET6_ADDRSTRLEN) == nullptr)
             perror("inet_ntop");
@@ -44,18 +44,18 @@ void ArgumentParser::print_arguments()
     std::cout << "---------------------------------" << std::endl;
 
     for (unsigned int i = 0; i < this->syslog_server_addr.size(); i++) {
-        std::cout << "Syslog server no. " << i << ":" << endl;
+        std::cout << "Syslog server no. " << i << ":" << std::endl;
         this->get_IPv4_elements(this->syslog_server_addr.at(i).addr_IPv4);
         this->get_IPv6_elements(this->syslog_server_addr.at(i).addr_IPv6);
     }
     std::cout << "---------------------------------" << std::endl;
 
-    std::cout << "Interface name: " << endl;
+    std::cout << "Interface name: " << std::endl;
     std::cout << "---------------------------------" << std::endl;
 
-    std::cout << "Pcap files: " << endl;
+    std::cout << "Pcap files: " << std::endl;
     for(unsigned int i = 0; i < this->pcap_files.size(); i++) {
-        std::cout << "pcap_file no. " << i << ": " << this->pcap_files.at(i) << endl;
+        std::cout << "pcap_file no. " << i << ": " << this->pcap_files.at(i) << std::endl;
     }
 }
 
@@ -66,7 +66,7 @@ void ArgumentParser::proccess_file_argument(const std::string& file_name)
     if (stat(file_name.c_str(), &sb) == 0) {
         this->pcap_files.emplace_back(std::string(file_name));
     } else {
-        std::cerr << "Invalid pcap file: " << file_name << endl;
+        std::cerr << "Invalid pcap file: " << file_name << std::endl;
     }
 }
 
@@ -83,7 +83,7 @@ struct AddressWrapper ArgumentParser::proccess_syslog_address(const std::string&
     if (not res and s) {
         struct hostent *he = gethostbyname(addr.c_str());
         if (!he) {
-            std::cerr << "Invalid address/hostname of syslog_server: " << addr << endl;
+            std::cerr << "Invalid address/hostname of syslog_server: " << addr << std::endl;
         } else {
             if (he->h_addrtype == AF_INET) {
                 struct in_addr **addr_list = (struct in_addr **) he->h_addr_list;
@@ -110,7 +110,7 @@ struct AddressWrapper ArgumentParser::proccess_syslog_address(const std::string&
         s = inet_pton(AF_INET, addr.c_str(), &addr_IPv4.sin_addr);
         if (s <= 0) {
             if (!s) {
-                std::cerr << "Not in presentation format" << endl;
+                std::cerr << "Not in presentation format" << std::endl;
             } else {
                 perror("inet_pton");
             }
@@ -124,14 +124,14 @@ struct AddressWrapper ArgumentParser::proccess_syslog_address(const std::string&
         s = inet_pton(AF_INET6, addr.c_str(), &addr_IPv6.sin6_addr);
         if (s <= 0) {
             if (!s)
-                std::cerr << "IPv6 address in not in presentation format" << endl;
+                std::cerr << "IPv6 address in not in presentation format" << std::endl;
             else
-                std::cerr << "inet_pton: " << gai_strerror(s) << endl;
+                std::cerr << "inet_pton: " << gai_strerror(s) << std::endl;
         }
         address_wrapper.addr_IPv6.push_back(addr_IPv6);
         freeaddrinfo(res);  /* No longer needed */
     } else {
-        std::cerr << "getaddrinfo: " <<  gai_strerror(s) << endl;
+        std::cerr << "getaddrinfo: " <<  gai_strerror(s) << std::endl;
     }
     return address_wrapper;
 }
@@ -175,7 +175,7 @@ void ArgumentParser::parse_arguments(int argc, char **argv)
                 break;
             }
             default: {
-                std::cerr << "Argument error!" << endl;
+                std::cerr << "Argument error!" << std::endl;
                 exit(-1);
             }
         }

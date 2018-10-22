@@ -1,0 +1,582 @@
+4video.cz NS alfa.ns.active24.cz 1
+4video.cz NS beta.ns.active24.cz 1
+4video.cz NS gama.ns.active24.sk 1
+a0dscb1.akamaiedge.net AAAA 2600:1480:e800::c0 3
+a0g.akamaiedge.net AAAA 2600:1480:e800::c0 20
+a0w20.akamai.net AAAA 2600:1480:e800::c0 1
+a10-128.akadns.org A 96.7.50.128 3
+a11-129.akadns.net A 84.53.139.129 2
+a1-128.akadns.net A 193.108.88.128 3
+a1294.w20.akamai.net A 2.21.74.57 1
+a1294.w20.akamai.net A 2.21.74.65 1
+a13-130.akadns.org A 2.22.230.130 1
+a28-129.akadns.org A 95.100.173.129 1
+a3-129.akadns.net A 96.7.49.129 3
+a4-131.akadns.org A 72.246.46.131 3
+a5-130.akadns.org A 95.100.168.130 3
+a7-131.akadns.net A 23.61.199.131 3
+a9-128.akadns.net A 184.85.248.128 3
+advertising.bbcworldwide.com CNAME advertising.bbcworldwide.com.edgekey.net 2
+advertising.bbcworldwide.com.edgekey.net CNAME e10296.g.akamaiedge.net 2
+akadns.net NS a10-128.akadns.org 3
+akadns.net NS a11-129.akadns.net 3
+akadns.net NS a1-128.akadns.net 3
+akadns.net NS a13-130.akadns.org 3
+akadns.net NS a28-129.akadns.org 3
+akadns.net NS a3-129.akadns.net 3
+akadns.net NS a4-131.akadns.org 3
+akadns.net NS a5-130.akadns.org 3
+akadns.net NS a7-131.akadns.net 3
+akadns.net NS a9-128.akadns.net 3
+akadns.net SOA internal.akadns.net hostmaster.akamai.com 1477167800 90000 90000 90000 180 2
+akadns.net SOA internal.akadns.net hostmaster.akamai.com 1477167835 90000 90000 90000 180 1
+akadns.net SOA internal.akadns.net hostmaster.akamai.com 1477167986 90000 90000 90000 180 1
+alfa.ns.active24.cz A 81.95.96.2 1
+alfa.ns.active24.cz AAAA 2a02:4a8:ac24:100::96:2 1
+a.ns.c10r.facebook.com A 69.171.239.11 2
+a.ns.c10r.facebook.com AAAA 2a03:2880:fffe:b:face:b00c:0:99 2
+a.ns.nic.cz A 194.0.12.1 3
+a.ns.nic.cz AAAA 2001:678:f::1 3
+a.ns.nic.cz RRSIG AAAA RSA/SHA-1 4 1800 20161104080145 20161021155002 7806 nic.cz a041ad7f28488b41e5c39b279e1c1d6a36357dcf...  2
+a.ns.nic.cz RRSIG A RSA/SHA-1 4 1800 20161104103804 20161021155002 7806 nic.cz 958ccda98bbb93d6d55c3521608cf68287ab30e8...  2
+asimov-win.settings.data.microsoft.com.akadns.net CNAME geo.settings.data.microsoft.com.akadns.net 2
+asimov-win.vortex.data.microsoft.com.akadns.net CNAME geo.vortex.data.microsoft.com.akadns.net 2
+bbc01.sitestat.com A 77.72.116.213 1
+bbc01.sitestat.com A 77.72.118.213 1
+bbc01.sitestat.com NS glns04.sitestat.com 1
+bbc01.sitestat.com NS glns05.sitestat.com 1
+bbc01.sitestat.com NS glns06.sitestat.com 1
+bbc.com NS ns3.bbc.co.uk 1
+bbc.com NS ns3.bbc.net.uk 1
+bbc.com NS ns4.bbc.co.uk 1
+bbc.com NS ns4.bbc.net.uk 1
+bbc.com SOA ns.bbc.co.uk hostmaster.bbc.co.uk 2016101901 1800 600 864000 86400 1
+bbc.net.uk NS ns0.rbsov.bbc.co.uk 11
+bbc.net.uk NS ns0.tcams.bbc.co.uk 11
+bbc.net.uk NS ns0.thdow.bbc.co.uk 11
+bbc.net.uk SOA 212.58.224.6 bofh.bbc.co.uk 1477060669 86400 86400 86400 300 11
+bbc.net.uk SOA 212.58.225.6 bofh.bbc.co.uk 1477060669 86400 86400 86400 300 2
+beacon-a-dub.lb.krxd.net CNAME beacon-a-v2-596299490.eu-west-1.elb.amazonaws.com 2
+beacon-a-v2-596299490.eu-west-1.elb.amazonaws.com A 46.137.176.178 1
+beacon-a-v2-596299490.eu-west-1.elb.amazonaws.com A 46.137.191.93 1
+beacon-a-v2-596299490.eu-west-1.elb.amazonaws.com A 46.137.88.70 1
+beacon-a-v2-596299490.eu-west-1.elb.amazonaws.com A 46.51.180.69 1
+beacon-a-v2-596299490.eu-west-1.elb.amazonaws.com A 54.217.205.184 1
+beacon-a-v2-596299490.eu-west-1.elb.amazonaws.com A 54.228.192.30 1
+beacon-a-v2-596299490.eu-west-1.elb.amazonaws.com A 54.228.201.86 1
+beacon-a-v2-596299490.eu-west-1.elb.amazonaws.com A 54.228.211.70 1
+beacon.krxd.net CNAME beacon-a-dub.lb.krxd.net 2
+b.ns.c10r.facebook.com A 69.171.255.11 2
+b.ns.c10r.facebook.com AAAA 2a03:2880:ffff:b:face:b00c:0:99 2
+b.ns.nic.cz A 194.0.13.1 3
+b.ns.nic.cz AAAA 2001:678:10::1 3
+b.ns.nic.cz RRSIG A RSA/SHA-1 4 1800 20161104115058 20161021155002 7806 nic.cz 9a12fb7e71d2877583299589535a9bc47c978fbe...  2
+c10r.facebook.com NS a.ns.c10r.facebook.com 2
+c10r.facebook.com NS b.ns.c10r.facebook.com 2
+cdn-fastly.krxd.net.c.global-ssl.fastly.net CNAME prod.c.ssl.global.fastlylb.net 2
+cdn-fastly.krxd.net CNAME cdn-fastly.krxd.net.c.global-ssl.fastly.net 2
+cdn.globalsigncdn.com A 104.16.24.216 2
+cdn.globalsigncdn.com A 104.16.25.216 2
+cdn.globalsigncdn.com A 104.16.26.216 2
+cdn.globalsigncdn.com A 104.16.27.216 2
+cdn.globalsigncdn.com A 104.16.28.216 2
+cdn.globalsigncdn.com AAAA 2400:cb00:2048:1::6810:18d8 1
+cdn.globalsigncdn.com AAAA 2400:cb00:2048:1::6810:19d8 1
+cdn.globalsigncdn.com AAAA 2400:cb00:2048:1::6810:1ad8 1
+cdn.globalsigncdn.com AAAA 2400:cb00:2048:1::6810:1bd8 1
+cdn.globalsigncdn.com AAAA 2400:cb00:2048:1::6810:1cd8 1
+cdn.krxd.net CNAME cdn-traffic-director.krxd.net 2
+cdn-traffic-director.krxd.net CNAME cdn-fastly.krxd.net 2
+cesnet.cz A 195.113.144.230 2
+cesnet.cz NS decsys.vsb.cz 4
+cesnet.cz NS nsa.ces.net 4
+cesnet.cz NS nsa.cesnet.cz 4
+cesnet.cz RRSIG A RSA/SHA-512 2 3600 20161108113753 20161009211206 61643 cesnet.cz 39bd612132bac3a2cf5d3fc62b72bded1787ea13...  1
+cesnet.cz RRSIG DNSKEY RSA/SHA-512 2 3600 20161107155146 20161009031206 27793 cesnet.cz d249f094c0ebe0f7472027759ad8b1b5dcc96bc1...  1
+c.go-mpulse.net.cdn.cloudflare.net A 104.16.23.190 1
+c.go-mpulse.net.cdn.cloudflare.net A 104.16.24.190 1
+c.go-mpulse.net.cdn.cloudflare.net A 104.16.25.190 1
+c.go-mpulse.net.cdn.cloudflare.net A 104.16.26.190 1
+c.go-mpulse.net.cdn.cloudflare.net A 104.16.27.190 1
+c.go-mpulse.net CNAME c.go-mpulse.net.cdn.cloudflare.net 2
+chartbeat.net NS ns-125.awsdns-15.com 6
+chartbeat.net NS ns-1329.awsdns-38.org 6
+chartbeat.net NS ns-1726.awsdns-23.co.uk 6
+chartbeat.net NS ns-905.awsdns-49.net 6
+clients1.google.com CNAME clients.l.google.com 2
+clients.l.google.com A 95.168.222.148 1
+clients.l.google.com A 95.168.222.152 1
+clients.l.google.com A 95.168.222.153 1
+clients.l.google.com A 95.168.222.157 1
+clients.l.google.com A 95.168.222.158 1
+clients.l.google.com A 95.168.222.162 1
+clients.l.google.com A 95.168.222.163 1
+clients.l.google.com A 95.168.222.167 1
+clients.l.google.com A 95.168.222.168 1
+clients.l.google.com A 95.168.222.172 1
+clients.l.google.com A 95.168.222.173 1
+clients.l.google.com A 95.168.222.177 1
+clients.l.google.com A 95.168.222.178 1
+clients.l.google.com A 95.168.222.182 1
+clients.l.google.com A 95.168.222.183 1
+clients.l.google.com A 95.168.222.187 1
+clients.l.google.com AAAA 2a00:1450:4008:803::200e 2
+cloudflare.net NS ns1.cloudflare.net 1
+cloudflare.net NS ns2.cloudflare.net 1
+cloudflare.net NS ns3.cloudflare.net 1
+cloudflare.net NS ns4.cloudflare.net 1
+cloudflare.net NS ns5.cloudflare.net 1
+cloudflare.net SOA ns1.cloudflare.net dns.cloudflare.com 2022408310 10000 2400 604800 3600 2
+crl.globalsign.net A 198.41.214.183 1
+crl.globalsign.net A 198.41.214.184 1
+crl.globalsign.net A 198.41.214.185 1
+crl.globalsign.net A 198.41.214.186 1
+crl.globalsign.net A 198.41.214.187 1
+crl.globalsign.net A 198.41.215.182 1
+crl.globalsign.net A 198.41.215.183 1
+crl.globalsign.net A 198.41.215.184 1
+crl.globalsign.net A 198.41.215.185 1
+crl.globalsign.net A 198.41.215.186 1
+crl.globalsign.net AAAA 2400:cb00:2048:1::c629:d6b7 1
+crl.globalsign.net AAAA 2400:cb00:2048:1::c629:d6b8 1
+crl.globalsign.net AAAA 2400:cb00:2048:1::c629:d6b9 1
+crl.globalsign.net AAAA 2400:cb00:2048:1::c629:d6ba 1
+crl.globalsign.net AAAA 2400:cb00:2048:1::c629:d6bb 1
+crl.globalsign.net AAAA 2400:cb00:2048:1::c629:d7b6 1
+crl.globalsign.net AAAA 2400:cb00:2048:1::c629:d7b7 1
+crl.globalsign.net AAAA 2400:cb00:2048:1::c629:d7b8 1
+crl.globalsign.net AAAA 2400:cb00:2048:1::c629:d7b9 1
+crl.globalsign.net AAAA 2400:cb00:2048:1::c629:d7ba 1
+cyrus.cesnet.cz A 195.113.144.245 3
+cyrus.cesnet.cz AAAA 2001:718:1:101::144:245 2
+cz NS a.ns.nic.cz 1
+cz NS b.ns.nic.cz 1
+cz NS c.ns.nic.cz 1
+cz NS d.ns.nic.cz 1
+db5.settings.data.microsoft.com.akadns.net A 40.77.226.249 1
+db5.vortex.data.microsoft.com.akadns.net A 64.4.54.254 1
+decsys.vsb.cz A 158.196.149.9 4
+decsys.vsb.cz AAAA 2001:718:1001:149::9 4
+dns1.p03.nsone.net A 198.51.44.3 1
+dns2.p03.nsone.net A 198.51.45.3 1
+dns3.p03.nsone.net A 198.51.44.67 1
+dns4.p03.nsone.net A 198.51.45.67 1
+d.ns.nic.cz A 193.29.206.1 3
+d.ns.nic.cz AAAA 2001:678:1::1 3
+doubleclick.net NS ns1.google.com 5
+doubleclick.net NS ns2.google.com 5
+doubleclick.net NS ns3.google.com 5
+doubleclick.net NS ns4.google.com 5
+dscb1.akamaiedge.net NS a0dscb1.akamaiedge.net 3
+dscb1.akamaiedge.net NS n0dscb1.akamaiedge.net 3
+dscb1.akamaiedge.net NS n1dscb1.akamaiedge.net 3
+dscb1.akamaiedge.net NS n2dscb1.akamaiedge.net 3
+dscb1.akamaiedge.net NS n3dscb1.akamaiedge.net 3
+dscb1.akamaiedge.net NS n4dscb1.akamaiedge.net 3
+dscb1.akamaiedge.net NS n5dscb1.akamaiedge.net 3
+dscb1.akamaiedge.net NS n6dscb1.akamaiedge.net 3
+dscb1.akamaiedge.net NS n7dscb1.akamaiedge.net 3
+dxedge-prod-lb-404808087.eu-central-1.elb.amazonaws.com A 52.28.121.238 1
+dxedge-prod-lb-404808087.eu-central-1.elb.amazonaws.com A 52.28.171.120 1
+dxedge-prod-lb-404808087.eu-central-1.elb.amazonaws.com A 52.28.78.40 1
+dxedge-prod-lb-404808087.eu-central-1.elb.amazonaws.com A 52.29.132.94 1
+dxedge-prod-lb-404808087.eu-central-1.elb.amazonaws.com A 52.29.155.24 1
+dxedge-prod-lb-404808087.eu-central-1.elb.amazonaws.com A 52.59.116.250 1
+dxedge-prod-lb-404808087.eu-central-1.elb.amazonaws.com A 54.93.130.65 1
+dxedge-prod-lb-404808087.eu-central-1.elb.amazonaws.com A 54.93.194.19 1
+e10296.g.akamaiedge.net A 104.123.201.155 2
+e3891.g.akamaiedge.net A 104.123.225.99 18
+e8218.dscb1.akamaiedge.net A 23.37.43.27 1
+e8218.dscb1.akamaiedge.net AAAA 2a02:26f0:132:384::201a 2
+e8218.dscb1.akamaiedge.net AAAA 2a02:26f0:132:386::201a 2
+edigitalsurvey.com A 46.236.9.36 1
+edigitalsurvey.com NS ns0.dedipower.net 1
+edigitalsurvey.com NS ns1.dedipower.net 1
+edigitalsurvey.com NS ns2.dedipower.net 1
+edigitalsurvey.com SOA ns0.dedipower.net ns0.dedipower.net 4037606101 300 120 604800 86400 1
+em.io NS ns-1165.awsdns-17.org 2
+em.io NS ns-1797.awsdns-32.co.uk 2
+em.io NS ns-26.awsdns-03.com 2
+em.io NS ns-898.awsdns-48.net 2
+em.io SOA ns-1797.awsdns-32.co.uk awsdns-hostmaster.amazon.com 1 7200 900 1209600 86400 2
+eric.ns.cloudflare.com A 173.245.59.112 5
+eric.ns.cloudflare.com AAAA 2400:cb00:2049:1::adf5:3b70 5
+eu-central-1.elb.amazonaws.com NS ns-1326.awsdns-37.org 1
+eu-central-1.elb.amazonaws.com NS ns-1689.awsdns-19.co.uk 1
+eu-central-1.elb.amazonaws.com NS ns-417.awsdns-52.com 1
+eu-central-1.elb.amazonaws.com NS ns-613.awsdns-12.net 1
+eu-central-1.elb.amazonaws.com SOA ns-1689.awsdns-19.co.uk awsdns-hostmaster.amazon.com 1 7200 900 1209600 60 2
+eu-lb-p01-544546018.eu-west-1.elb.amazonaws.com A 52.19.80.20 1
+eu-lb-p01-544546018.eu-west-1.elb.amazonaws.com A 52.30.91.181 1
+eu-lb-p01-544546018.eu-west-1.elb.amazonaws.com A 54.154.197.229 1
+eu-west-1.elb.amazonaws.com NS ns-1053.awsdns-03.org 3
+eu-west-1.elb.amazonaws.com NS ns-2023.awsdns-60.co.uk 3
+eu-west-1.elb.amazonaws.com NS ns-341.awsdns-42.com 3
+eu-west-1.elb.amazonaws.com NS ns-739.awsdns-28.net 3
+eu-west-1.elb.amazonaws.com SOA ns-1053.awsdns-03.org awsdns-hostmaster.amazon.com 1 7200 900 1209600 60 6
+eu-west.load.exelator.com CNAME load.amexp.exelator.com 2
+e.visualdna.com CNAME eu-lb-p01-544546018.eu-west-1.elb.amazonaws.com 2
+exacttarget.com NS ns1.exacttarget.com 1
+exacttarget.com NS ns2.exacttarget.com 1
+exacttarget.com NS ns3.exacttarget.com 1
+exacttarget.com NS ns4.exacttarget.com 1
+exelator.com NS dns1.p03.nsone.net 1
+exelator.com NS dns2.p03.nsone.net 1
+exelator.com NS dns3.p03.nsone.net 1
+exelator.com NS dns4.p03.nsone.net 1
+exelator.com SOA dns1.p03.nsone.net hostmaster.nsone.net 1477139576 3600 300 604800 3600 2
+fastlylb.net NS ns1.fastlylb.net 2
+fastlylb.net NS ns2.fastlylb.net 2
+fastlylb.net NS ns3.fastlylb.net 2
+fastlylb.net NS ns4.fastlylb.net 2
+fastlylb.net SOA ns1.fastlydns.net hostmaster.fastly.com 2014010400 28800 900 604800 180 4
+feec.vutbr.cz MX 10 kos.feec.vutbr.cz 1
+feec.vutbr.cz MX 20 fest.stud.feec.vutbr.cz 1
+feec.vutbr.cz RRSIG MX RSA/SHA-1 3 14400 20161120095445 20161021105445 62220 feec.vutbr.cz 1f164fa2226205c85b63e171a21ff9a5255c5...  1
+feeds.bbci.co.uk CNAME feeds.bbci.co.uk.edgekey.net 2
+feeds.bbci.co.uk.edgekey.net CNAME e3891.g.akamaiedge.net 2
+fig.bbc.co.uk CNAME fig.bbc.net.uk 2
+fig.bbc.net.uk A 212.58.244.115 2
+fig.bbc.net.uk A 212.58.246.213 2
+fit.vutbr.cz DS e88d RSA/SHA-1 1 7814f57de4bb7fd48cf3dd952549d6cff162b21f...  1
+fit.vutbr.cz DS e88d RSA/SHA-1 2 183a5585cb41f22448d43311ab2ab7f584ceafd...  1
+fit.vutbr.cz NS gate.feec.vutbr.cz 4
+fit.vutbr.cz NS guta.fit.vutbr.cz 4
+fit.vutbr.cz NS kazi.fit.vutbr.cz 4
+fit.vutbr.cz NS rhino.cis.vutbr.cz 4
+fit.vutbr.cz RRSIG DNSKEY RSA/SHA-1 3 14400 20161120201900 20161021211900 35421 fit.vutbr.cz 92dd438c26bc3ea5c42cef765f4baa8bd91c59...  1
+fit.vutbr.cz RRSIG DS RSA/SHA-1 3 28800 20161118142240 20161019152240 39756 vutbr.cz 402588235cc8fea40e04f7b4e76c169174419d2...  1
+fit.vutbr.cz RRSIG NS RSA/SHA-1 3 14400 20161120201900 20161021211900 35421 fit.vutbr.cz 3402b4bc97b878abe07f1b10663fee6a29fdb9...  4
+g.akamaiedge.net NS a0g.akamaiedge.net 20
+g.akamaiedge.net NS n0g.akamaiedge.net 20
+g.akamaiedge.net NS n1g.akamaiedge.net 20
+g.akamaiedge.net NS n2g.akamaiedge.net 20
+g.akamaiedge.net NS n3g.akamaiedge.net 20
+g.akamaiedge.net NS n4g.akamaiedge.net 20
+g.akamaiedge.net NS n5g.akamaiedge.net 20
+g.akamaiedge.net NS n6g.akamaiedge.net 20
+g.akamaiedge.net NS n7g.akamaiedge.net 20
+g.akamaiedge.net SOA n0g.akamaiedge.net hostmaster.akamai.com 1477167179 1000 1000 1000 1800 9
+g.akamaiedge.net SOA n0g.akamaiedge.net hostmaster.akamai.com 1477167185 1000 1000 1000 1800 2
+g.akamaiedge.net SOA n0g.akamaiedge.net hostmaster.akamai.com 1477168189 1000 1000 1000 1800 2
+gama.ns.active24.sk A 194.9.95.219 1
+gama.ns.active24.sk AAAA 2a02:250::317 1
+gate.feec.vutbr.cz A 147.229.71.10 4
+gate.feec.vutbr.cz AAAA 2001:67c:1220:9847::93e5:470a 4
+gate.feec.vutbr.cz RRSIG AAAA RSA/SHA-1 4 14400 20161120095445 20161021105445 62220 feec.vutbr.cz 67fe2498e193b45291176b34c5fb338ca370f785...  4
+gate.feec.vutbr.cz RRSIG A RSA/SHA-1 4 14400 20161120095445 20161021105445 62220 feec.vutbr.cz 3c54e462e3d3c4457fda3e369baee51d9becd74...  4
+geo.settings.data.microsoft.com.akadns.net CNAME db5.settings.data.microsoft.com.akadns.net 2
+geo.vortex.data.microsoft.com.akadns.net CNAME db5.vortex.data.microsoft.com.akadns.net 2
+glns04.sitestat.com A 77.72.112.235 1
+glns05.sitestat.com A 77.72.116.235 1
+glns06.sitestat.com A 77.72.118.235 1
+globalsigncdn.com NS eric.ns.cloudflare.com 3
+globalsigncdn.com NS rose.ns.cloudflare.com 3
+globalsign.net NS eric.ns.cloudflare.com 2
+globalsign.net NS rose.ns.cloudflare.com 2
+global.ssl.fastly.net CNAME global-ssl.fastly.net 2
+global-ssl.fastly.net CNAME prod.a.ssl.global.fastlylb.net 2
+google.com NS ns1.google.com 5
+google.com NS ns2.google.com 5
+google.com NS ns3.google.com 5
+google.com NS ns4.google.com 5
+gp.symcd.com CNAME ocsp-ds.ws.symantec.com.edgekey.net 2
+guta.fit.vutbr.cz A 147.229.9.11 4
+guta.fit.vutbr.cz AAAA 2001:67c:1220:809::93e5:90b 4
+guta.fit.vutbr.cz RRSIG AAAA RSA/SHA-1 4 14400 20161120201900 20161021211900 35421 fit.vutbr.c 00000000000000000000...  1
+guta.fit.vutbr.cz RRSIG AAAA RSA/SHA-1 4 14400 20161120201900 20161021211900 35421 fit.vutbr.cz 00000000000000000000...  2
+guta.fit.vutbr.cz RRSIG AAAA RSA/SHA-1 4 14400 20161120201900 20161021211900 35421 fit.vutbr.cz 47411837c4be00000000000000...  1
+guta.fit.vutbr.cz RRSIG A RSA/SHA-1 4 14400 20161120201900 20161021211900 35421 fit.vutbr.cz bf75fe8f4b7a85f13e11dfc296c76f43986c427...  4
+ichef-1.bbci.co.uk CNAME ichef.bbci.co.uk 1
+ichef-bbci.bbc.net.uk CNAME ichef.bbci.co.uk.edgekey.net 3
+ichef.bbci.co.uk CNAME ichef-bbci.bbc.net.uk 3
+ichef.bbci.co.uk.edgekey.net CNAME e3891.g.akamaiedge.net 3
+idsync-ext.rlcdn.com A 54.152.203.23 2
+idsync.rlcdn.com CNAME idsync-ext.rlcdn.com 2
+i.w55c.net CNAME dxedge-prod-lb-404808087.eu-central-1.elb.amazonaws.com 2
+kazi4.fit.vutbr.cz NSEC kazi6.fit.vutbr.cz CNAME MX KEY GPOS EID SRV ATM NAPTR KX A6 DNAME OPT 1
+kazi4.fit.vutbr.cz RRSIG NSEC RSA/SHA-1 4 86400 20161120201900 20161021211900 35421 fit.vutbr.cz b6ee17ebad4fb89b8069d65a116e5f183b123e...  1
+kazi6.fit.vutbr.cz NSEC kbterm.fit.vutbr.cz MX KEY GPOS EID SRV ATM NAPTR KX A6 DNAME OPT 1
+kazi6.fit.vutbr.cz RRSIG NSEC RSA/SHA-1 4 86400 20161120201900 20161021211900 35421 fit.vutbr.cz 338fb8dad4fbbdec6ef8edcb37a9981144652...  1
+kazi.fit.vutbr.cz A 147.229.8.12 4
+kazi.fit.vutbr.cz NSEC kazi4.fit.vutbr.cz A MX KEY GPOS EID SRV ATM NAPTR KX A6 DNAME OPT 1
+kazi.fit.vutbr.cz RRSIG NSEC RSA/SHA-1 4 86400 20161120201900 20161021211900 35421 fit.vutbr.cz 58634cc3c723d36bd8443d58c362aa45d6b6fd...  1
+kbterm.fit.vutbr.cz NSEC kermit.fit.vutbr.cz A MX KEY GPOS EID SRV ATM NAPTR KX A6 DNAME OPT 1
+kbterm.fit.vutbr.cz RRSIG NSEC RSA/SHA-1 4 86400 20161120201900 20161021211900 35421 fit.vutbr.cz c216ae8cd57dbda713852e04ee2cacf71677e62...  1
+live-mybb-componen-1ja6lq9r6z7zi-1331949258.eu-west-1.elb.amazonaws.com A 52.16.236.252 1
+live-mybb-componen-1ja6lq9r6z7zi-1331949258.eu-west-1.elb.amazonaws.com A 52.210.59.77 1
+load.amexp.exelator.com A 216.52.1.12 1
+loadm.exelator.com CNAME loadus.tm.ssl.exelator.com 2
+load.s3.amazonaws.com CNAME s3-1-w.amazonaws.com 2
+loadus.tm.ssl.exelator.com CNAME eu-west.load.exelator.com 2
+m.bbc.co.uk CNAME m.live.bbc.co.uk 1
+me-cdn.effectivemeasure.net CNAME traffic.em.io 2
+m.live.bbc.co.uk CNAME m-live.bbc.net.uk 1
+m-live.bbc.net.uk A 212.58.244.163 1
+m-live.bbc.net.uk A 212.58.246.174 1
+muni.cz RRSIG DNSKEY RSASHA1-NSEC3-SHA1 2 7200 20161130010000 20161020131640 26957 muni.cz 17b824684845c2529eac922c1ca7da5f86e2b7a...  1
+muni.cz RRSIG NS RSASHA1-NSEC3-SHA1 2 7200 20161130010000 20161020131640 26957 muni.cz 704c133435dedeb6229a5ae915d701ec656...  1
+mvcr.cz DS ff9d RSA/SHA-1 2 3fb1aba6eadb1b7acd8e2da767374f3c135cbf0...  1
+mvcr.cz NSEC admin.mvcr.cz A NS SOA MG NULL PTR MX TXT KEY GPOS LOC NXT OPT NSEC 1
+mvcr.cz RRSIG DS RSA/SHA-512 2 18000 20161104213108 20161022180737 63935 cz 7a82db91fcb5e23a182491edb2981995f0ee1227...  1
+mvcr.cz RRSIG NSEC RSA/SHA-1 2 86400 20161112133545 20161013143545 62901 mvcr.cz 932d434d26f24f5c435f4256f7b32f1a14e8a1...  1
+mybbc.files.bbci.co.uk CNAME mybbc.files.bbci.co.uk.edgekey.net 2
+mybbc.files.bbci.co.uk.edgekey.net CNAME e3891.g.akamaiedge.net 2
+n0dscb1.akamaiedge.net A 2.21.74.206 3
+n0g.akamaiedge.net A 213.200.109.176 5
+n0g.akamaiedge.net A 88.221.81.195 15
+n0w20.akamai.net A 92.122.214.237 1
+n1dscb1.akamaiedge.net A 2.16.60.29 3
+n1g.akamaiedge.net A 2.21.74.206 15
+n1g.akamaiedge.net A 88.221.81.192 5
+n1w20.akamai.net A 2.22.119.199 1
+n2dscb1.akamaiedge.net A 104.103.73.101 3
+n2g.akamaiedge.net A 2.16.60.22 15
+n2g.akamaiedge.net A 2.21.74.207 5
+n2w20.akamai.net A 88.221.81.192 1
+n3dscb1.akamaiedge.net A 213.200.109.181 3
+n3g.akamaiedge.net A 104.103.73.103 15
+n3g.akamaiedge.net A 2.16.60.23 5
+n3w20.akamai.net A 23.14.93.242 1
+n4dscb1.akamaiedge.net A 88.221.81.193 3
+n4g.akamaiedge.net A 104.103.73.85 5
+n4g.akamaiedge.net A 213.200.109.184 15
+n4w20.akamai.net A 23.14.93.241 1
+n5dscb1.akamaiedge.net A 2.21.74.207 3
+n5g.akamaiedge.net A 2.21.74.204 5
+n5g.akamaiedge.net A 2.21.74.207 15
+n5w20.akamai.net A 23.14.93.240 1
+n6dscb1.akamaiedge.net A 2.21.74.204 3
+n6g.akamaiedge.net A 2.21.74.205 5
+n6w20.akamai.net A 23.14.93.235 1
+n7dscb1.akamaiedge.net A 2.21.74.205 2
+n7g.akamaiedge.net A 2.21.74.205 15
+n7g.akamaiedge.net A 2.21.74.206 5
+n7w20.akamai.net A 23.14.93.234 1
+nav.files.bbci.co.uk CNAME nav.files.bbci.co.uk.edgekey.net 1
+nav.files.bbci.co.uk.edgekey.net CNAME e3891.g.akamaiedge.net 1
+nbox.cz SOA sauron.netbox.cz admin.netbox.cz 1415625236 3600 600 1209600 3600 1
+netbox.cz NS ns1.netbox.cz 1
+netbox.cz NS ns2.netbox.cz 1
+netbox.cz SOA sauron.netbox.cz admin.netbox.cz 1477041329 3600 600 1209600 3600 1
+news.bbc.co.uk CNAME newswww.bbc.net.uk 2
+newswww.bbc.net.uk A 212.58.244.56 1
+newswww.bbc.net.uk A 212.58.246.80 1
+nic.cz NS a.ns.nic.cz 3
+nic.cz NS b.ns.nic.cz 3
+nic.cz NS d.ns.nic.cz 3
+nic.cz RRSIG NS RSA/SHA-1 2 1800 20161104041736 20161021155002 7806 nic.cz 20639421a53c1e426151efbef2853ce2e38ae20...  2
+nic.cz RRSIG SOA RSA/SHA-1 2 1800 20161104024227 20161021155002 7806 nic.cz 1deb2dd322afba454fce5bfdd7643db15568d...  1
+nic.cz SOA a.ns.nic.cz hostmaster.nic.cz 1477061402 10800 3600 1209600 7200 2
+ni.cz NS ns1.vultr.com 1
+ni.cz NS ns2.vultr.com 1
+ni.cz SOA ns1.vultr.com dnsadm.choopa.com 1472492563 10800 3600 604800 3600 1
+ns0.dedipower.net A 81.29.64.230 1
+ns-1035.awsdns-01.org A 205.251.196.11 2
+ns-1053.awsdns-03.org A 205.251.196.29 3
+ns-1119.awsdns-11.org A 205.251.196.95 1
+ns-125.awsdns-15.com A 205.251.192.125 6
+ns-1306.awsdns-35.org A 205.251.197.26 2
+ns-1326.awsdns-37.org A 205.251.197.46 1
+ns-1726.awsdns-23.co.uk A 205.251.198.190 6
+ns-1793.awsdns-32.co.uk A 205.251.199.1 1
+ns-1925.awsdns-48.co.uk A 205.251.199.133 2
+ns1.cloudflare.net A 173.245.59.31 1
+ns1.cloudflare.net AAAA 2400:cb00:2049:1::adf5:3b1f 1
+ns1.dedipower.net A 81.29.66.10 1
+ns1.exacttarget.com A 66.231.91.222 1
+ns1.fastlylb.net A 23.235.32.32 2
+ns1.google.com A 216.239.32.10 10
+ns1.netbox.cz A 83.240.0.186 1
+ns1.netzquadrat.de A 217.10.64.99 2
+ns1.vultr.com A 173.199.96.96 1
+ns-2023.awsdns-60.co.uk A 205.251.199.231 3
+ns-235.awsdns-29.com A 205.251.192.235 1
+ns-26.awsdns-03.com A 205.251.192.26 2
+ns-294.awsdns-36.com A 205.251.193.38 2
+ns2.cloudflare.net A 198.41.222.131 1
+ns2.cloudflare.net AAAA 2400:cb00:2049:1::c629:de83 1
+ns2.dedipower.net A 216.66.35.6 1
+ns2.exacttarget.com A 66.231.94.222 1
+ns2.fastlylb.net A 104.156.80.32 2
+ns2.google.com A 216.239.34.10 10
+ns2.netbox.cz A 83.240.0.187 1
+ns2.netzquadrat.de A 217.10.66.66 2
+ns2.vultr.com A 173.199.96.97 1
+ns-341.awsdns-42.com A 205.251.193.85 3
+ns3.bbc.co.uk AAAA 2610:a1:1015::17 1
+ns3.cloudflare.net A 198.41.222.31 1
+ns3.cloudflare.net AAAA 2400:cb00:2049:1::c629:de1f 1
+ns3.exacttarget.com A 68.232.203.115 1
+ns3.fastlylb.net A 23.235.36.32 2
+ns3.google.com A 216.239.36.10 10
+ns-417.awsdns-52.com A 205.251.193.161 1
+ns-45.awsdns-05.com A 205.251.192.45 2
+ns4.bbc.co.uk AAAA 2001:502:4612::17 1
+ns4.cloudflare.net A 198.41.223.131 1
+ns4.cloudflare.net AAAA 2400:cb00:2049:1::c629:df83 1
+ns4.exacttarget.com A 136.147.129.78 1
+ns4.fastlylb.net A 104.156.84.32 2
+ns4.google.com A 216.239.38.10 10
+ns5.cloudflare.net A 198.41.223.31 1
+ns5.cloudflare.net AAAA 2400:cb00:2049:1::c629:df1f 1
+ns-662.awsdns-18.net A 205.251.194.150 2
+ns-905.awsdns-49.net A 205.251.195.137 6
+ns-934.awsdns-52.net A 205.251.195.166 1
+ns-978.awsdns-58.net A 205.251.195.210 2
+nsa.ces.net A 195.113.144.205 4
+nsa.ces.net AAAA 2001:718:1:1::144:205 4
+nsa.cesnet.cz A 195.113.144.228 4
+nsa.cesnet.cz AAAA 2001:718:1:101::144:228 4
+ocsp2.globalsign.com CNAME cdn.globalsigncdn.com 2
+ocsp-ds.ws.symantec.com.edgekey.net CNAME e8218.dscb1.akamaiedge.net 2
+ocsp.godaddy.com.akadns.net A 50.63.243.230 1
+ocsp.godaddy.com CNAME ocsp.godaddy.com.akadns.net 2
+pagead2.googlesyndication.com CNAME pagead46.l.doubleclick.net 2
+pagead46.l.doubleclick.net A 216.58.209.194 2
+pagead46.l.doubleclick.net AAAA 2a00:1450:400d:802::2002 3
+pages.email.bbc.com CNAME pages.virt.s6.exacttarget.com 2
+pages.virt.s6.exacttarget.com A 68.232.203.80 1
+ping.chartbeat.net A 107.20.147.185 1
+ping.chartbeat.net A 107.22.215.99 1
+ping.chartbeat.net A 107.22.250.38 1
+ping.chartbeat.net A 184.73.215.34 1
+ping.chartbeat.net A 23.21.147.123 1
+ping.chartbeat.net A 23.21.147.41 1
+ping.chartbeat.net A 23.21.206.73 1
+ping.chartbeat.net A 23.21.240.237 1
+ping.chartbeat.net A 23.21.54.131 1
+ping.chartbeat.net A 23.21.57.12 1
+ping.chartbeat.net A 23.21.73.93 1
+ping.chartbeat.net A 23.21.78.116 1
+ping.chartbeat.net A 23.21.84.138 1
+ping.chartbeat.net A 23.21.95.141 1
+ping.chartbeat.net A 23.23.131.65 1
+ping.chartbeat.net A 23.23.141.187 1
+ping.chartbeat.net A 23.23.170.207 1
+ping.chartbeat.net A 23.23.175.175 1
+ping.chartbeat.net A 23.23.220.195 1
+ping.chartbeat.net A 23.23.222.225 1
+ping.chartbeat.net A 50.16.197.102 1
+ping.chartbeat.net A 50.16.227.116 1
+ping.chartbeat.net A 50.17.197.15 1
+ping.chartbeat.net A 50.19.83.4 1
+ping.chartbeat.net A 54.197.250.167 1
+ping.chartbeat.net A 54.204.6.142 1
+ping.chartbeat.net A 54.225.184.146 1
+ping.chartbeat.net A 54.225.207.136 2
+ping.chartbeat.net A 54.225.216.1 2
+ping.chartbeat.net A 54.225.247.92 1
+ping.chartbeat.net A 54.225.73.95 1
+ping.chartbeat.net A 54.225.95.177 1
+ping.chartbeat.net A 54.235.106.167 1
+ping.chartbeat.net A 54.235.140.245 1
+ping.chartbeat.net A 54.235.168.251 1
+ping.chartbeat.net A 54.235.180.105 1
+ping.chartbeat.net A 54.243.116.238 1
+ping.chartbeat.net A 54.243.122.10 1
+ping.chartbeat.net A 54.243.156.79 1
+ping.chartbeat.net A 54.243.170.119 1
+ping.chartbeat.net A 54.243.192.35 1
+ping.chartbeat.net A 54.243.45.82 1
+ping.chartbeat.net A 54.243.68.187 1
+ping.chartbeat.net A 54.243.88.121 1
+ping.chartbeat.net A 54.243.97.69 1
+ping.chartbeat.net A 54.83.19.182 1
+polling.bbc.co.uk CNAME polling.bbc.co.uk.edgekey.net 4
+polling.bbc.co.uk.edgekey.net CNAME e3891.g.akamaiedge.net 4
+prod.a.ssl.global.fastlylb.net A 151.101.12.249 1
+prod.c.ssl.global.fastlylb.net A 151.101.12.175 1
+rhino.cis.vutbr.cz A 147.229.3.10 4
+rhino.cis.vutbr.cz AAAA 2001:67c:1220:e000::93e5:30a 4
+rlcdn.com NS ns-1306.awsdns-35.org 2
+rlcdn.com NS ns-1925.awsdns-48.co.uk 2
+rlcdn.com NS ns-45.awsdns-05.com 2
+rlcdn.com NS ns-662.awsdns-18.net 2
+rlcdn.com SOA ns-45.awsdns-05.com awsdns-hostmaster.amazon.com 2012040900 7200 900 1209600 86400 2
+rose.ns.cloudflare.com A 173.245.58.141 5
+rose.ns.cloudflare.com AAAA 2400:cb00:2049:1::adf5:3a8d 5
+s3-1-w.amazonaws.com A 52.216.65.48 2
+s3-1-w.amazonaws.com NS ns-1035.awsdns-01.org 2
+s3-1-w.amazonaws.com NS ns-1735.awsdns-24.co.uk 2
+s3-1-w.amazonaws.com NS ns-294.awsdns-36.com 2
+s3-1-w.amazonaws.com NS ns-978.awsdns-58.net 2
+s3-1-w.amazonaws.com SOA ns-978.awsdns-58.net awsdns-hostmaster.amazon.com 1 7200 900 1209600 86400 2
+sa.bbc.co.uk CNAME bbc01.sitestat.com 2
+search.bbc.co.uk CNAME search.bbc.net.uk 2
+search.bbc.net.uk A 212.58.244.158 2
+search.bbc.net.uk A 212.58.246.161 2
+search.files.bbci.co.uk CNAME search.files.bbci.co.uk.edgekey.net 2
+search.files.bbci.co.uk.edgekey.net CNAME e3891.g.akamaiedge.net 2
+secure-us.imrworldwide.com A 138.108.96.100 1
+secure-us.imrworldwide.com NS collectioncin-gtm2.nielsen.com 1
+secure-us.imrworldwide.com NS collectionleb-gtm1.nielsen.com 1
+settings-win.data.microsoft.com CNAME asimov-win.settings.data.microsoft.com.akadns.net 2
+shop.bbc.com A 207.159.133.98 1
+sipgate.net NS ns1.netzquadrat.de 2
+sipgate.net NS ns2.netzquadrat.de 2
+_sip._tcp.cesnet.cz SRV 100 10 5060 cyrus.cesnet.cz 1
+_sip._udp.cesnet.cz SRV 100 10 5060 cyrus.cesnet.cz 1
+_sip._udp.netbox.cz SRV 10 10 5060 vcse-001.4video.cz 1
+ssc.api.bbc.com CNAME ssc.live.3925c5b702a8aaca.xhst.bbci.co.uk 2
+ssc.live.3925c5b702a8aaca.xhst.bbci.co.uk CNAME live-mybb-componen-1ja6lq9r6z7zi-1331949258.eu-west-1.elb.amazonaws.com 2
+ssl.bbc.co.uk CNAME ssl.bbc.net.uk 2
+ssl.bbc.net.uk A 212.58.244.115 1
+ssl.bbc.net.uk A 212.58.246.213 1
+star-mini.c10r.facebook.com A 31.13.84.36 1
+star-mini.c10r.facebook.com AAAA 2a03:2880:f107:83:face:b00c:0:25de 1
+static.bbc.co.uk CNAME static.bbc.net.uk 2
+static.bbc.co.uk.edgekey.net CNAME e3891.g.akamaiedge.net 2
+static-bbci.bbc.net.uk CNAME static.bbci.co.uk.edgekey.net 2
+static.bbci.co.uk CNAME static-bbci.bbc.net.uk 2
+static.bbci.co.uk.edgekey.net CNAME e3891.g.akamaiedge.net 2
+static.bbc.net.uk CNAME static.bbc.co.uk.edgekey.net 2
+static.chartbeat.com CNAME global.ssl.fastly.net 2
+stun.ekiga.net CNAME stun.sipgate.net 2
+stun.sipgate.net A 217.10.68.152 2
+traffic.em.io A 52.17.222.178 2
+twitter.com SOA ns1.p26.dynect.net zone-admin.dyndns.com 2007130868 3600 600 604800 60 1
+ UNKNOWN RECORD TYPE !!! 0 16
+ UNKNOWN RECORD TYPE !!! 41 2
+us-east-1.elb.amazonaws.com NS ns-1119.awsdns-11.org 1
+us-east-1.elb.amazonaws.com NS ns-1793.awsdns-32.co.uk 1
+us-east-1.elb.amazonaws.com NS ns-235.awsdns-29.com 1
+us-east-1.elb.amazonaws.com NS ns-934.awsdns-52.net 1
+us-east-1.elb.amazonaws.com SOA ns-1119.awsdns-11.org awsdns-hostmaster.amazon.com 1 7200 900 1209600 60 2
+usermatch-ash-1350078884.us-east-1.elb.amazonaws.com A 107.22.241.77 1
+usermatch-ash-1350078884.us-east-1.elb.amazonaws.com A 23.21.212.240 1
+usermatch-ash-1350078884.us-east-1.elb.amazonaws.com A 23.23.219.8 1
+usermatch-ash-1350078884.us-east-1.elb.amazonaws.com A 50.17.232.169 1
+usermatch-ash-1350078884.us-east-1.elb.amazonaws.com A 50.19.107.76 1
+usermatch-ash-1350078884.us-east-1.elb.amazonaws.com A 54.197.254.190 1
+usermatch-ash-1350078884.us-east-1.elb.amazonaws.com A 54.225.133.124 1
+usermatch-ash-1350078884.us-east-1.elb.amazonaws.com A 54.225.210.192 1
+usermatch.krxd.net CNAME usermatch-ash-1350078884.us-east-1.elb.amazonaws.com 2
+vcse-001.4video.cz A 88.208.103.25 1
+virt.s6.exacttarget.com SOA ns1.exacttarget.com hostmaster.exacttarget.com 2015012700 7200 3600 1209600 300 2
+vortex-win.data.microsoft.com CNAME asimov-win.vortex.data.microsoft.com.akadns.net 2
+vutbr.cz RRSIG NS RSA/SHA-1 2 28800 20161118142240 20161019152240 39756 vutbr.cz 23ba7d5e96a8586f4b171d565cc56726687e862f...  1
+vutbr.cz RRSIG SOA RSA/SHA-1 2 28800 20161118142240 20161019152240 39756 vutbr.cz ca311050a35a52cafd98c8d563747a94611c3c...  1
+vutbr.cz SOA rhino.cis.vutbr.cz hostmaster.vutbr.cz 2016101900 28800 7200 604800 86400 1
+w20.akamai.net NS a0w20.akamai.net 1
+w20.akamai.net NS n0w20.akamai.net 1
+w20.akamai.net NS n1w20.akamai.net 1
+w20.akamai.net NS n2w20.akamai.net 1
+w20.akamai.net NS n3w20.akamai.net 1
+w20.akamai.net NS n4w20.akamai.net 1
+w20.akamai.net NS n5w20.akamai.net 1
+w20.akamai.net NS n6w20.akamai.net 1
+w20.akamai.net NS n7w20.akamai.net 1
+www-bbc-com.bbc.net.uk A 212.58.244.26 1
+www-bbc-com.bbc.net.uk A 212.58.244.27 1
+www-bbc-com.bbc.net.uk A 212.58.246.54 1
+www-bbc-com.bbc.net.uk A 212.58.246.55 1
+www.bbc.com CNAME www-bbc-com.bbc.net.uk 3
+www.bbc.co.uk CNAME www.bbc.net.uk 2
+www.bbc.net.uk A 212.58.244.71 2
+www.bbc.net.uk A 212.58.246.95 2
+www.google.com A 216.58.208.196 1
+www.google.com AAAA 2a00:1450:4007:80d::2004 1
+www.googletagservices.com CNAME pagead46.l.doubleclick.net 2
+www.nic.cz A 217.31.205.50 1
+www.nic.cz RRSIG A RSA/SHA-1 3 1800 20161104041059 20161021155002 7806 nic.cz 7bb5ceaa62563a829d4d3d7dc1586b8b06ba85b...  1

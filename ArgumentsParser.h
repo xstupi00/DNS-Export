@@ -11,9 +11,6 @@
 
 #include "DataStructures.h"
 
-using namespace std;
-
-
 class ArgumentParser
 {
     public:
@@ -22,7 +19,7 @@ class ArgumentParser
 
         std::vector<std::string> pcap_files;
         std::vector<struct AddressWrapper> syslog_server_addr;
-        std::string interface_name;
+        std::string interface_name = "";
         double time_in_seconds = 60.0;
 
         void parse_arguments(int argc, char**argv);

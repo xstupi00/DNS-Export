@@ -23,13 +23,8 @@
 #define NEXTHDR_IPV6		41	/* IPv6 in IPv6 */
 #define NEXTHDR_ROUTING		43	/* Routing header. */
 #define NEXTHDR_FRAGMENT	44	/* Fragmentation/reassembly header. */
-#define NEXTHDR_GRE		    47	/* GRE header. */
-#define NEXTHDR_ESP		    50	/* Encapsulating security payload. */
 #define NEXTHDR_AUTH		51	/* Authentication header. */
-#define NEXTHDR_ICMP		58	/* ICMPv6 message */
-#define NEXTHDR_NONE		59	/* No next header */
 #define NEXTHDR_DEST		60	/* Destination options header. */
-#define NEXTHDR_SCTP		132	/* SCTP message. */
 #define NEXTHDR_MOBILITY	135	/* Mobility header. */
 
 #define FOUR_OCTET_UNIT_TO_BYTES    2
@@ -46,6 +41,12 @@ struct AddressWrapper {
     std::vector<struct sockaddr_in6> addr_IPv6;
 };
 
+struct udphdr {
+    uint16_t source;
+    uint16_t dest;
+    uint16_t length;
+    uint16_t checksum;
+};
 
 struct auth_hdr
 {
