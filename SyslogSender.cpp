@@ -19,7 +19,7 @@ std::string SyslogSender::generate_timestamp() {
     const char *timestamp_format = "%04Y-%02m-%02dT%02H:%02M:%02S.";
     time_t rawtime;
     time(&rawtime);
-    struct tm *timeinfo = localtime(&rawtime);
+    struct tm *timeinfo = gmtime(&rawtime);
     auto *outstr = (char *) malloc(200);
     if (strftime(outstr, 200, timestamp_format, timeinfo) == 0) {
         std::cerr << "strftime returned 0" << std::endl;
@@ -161,8 +161,8 @@ void SyslogSender::sending_stats(std::vector<struct AddressWrapper> syslog_serve
         if (msg.str().size() + stats_item.first.size() + sizeof(int) <= 1000) { // 1KB
             msg << stats_item.first << " " << stats_item.second << std::endl;
         } else {
-            //this->send_msg_to_server(syslog_servers, msg.str());
-            //std::cout << msg.str() << std::endl;
+            this->send_msg_to_server(syslog_servers, msg.str());
+            std::cout << msg.str() << std::endl;
             msg = this->create_header();
         }
     }

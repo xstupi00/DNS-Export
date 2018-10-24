@@ -13,11 +13,10 @@ ArgumentParser::~ArgumentParser() = default;
 
 
 ///< debug functions for printing vector contains the IPv4 addresses
-void ArgumentParser::get_IPv4_elements(std::vector<struct sockaddr_in> vector_IPv4)
-{
+void ArgumentParser::get_IPv4_elements(std::vector<struct sockaddr_in> vector_IPv4) {
     char addr_IPv4[INET_ADDRSTRLEN];
     std::cout << "IPv4 Addresses: " << std::endl;
-    for(unsigned int i = 0; i < vector_IPv4.size(); i++) {
+    for (unsigned int i = 0; i < vector_IPv4.size(); i++) {
         if (inet_ntop(AF_INET, &(vector_IPv4.at(i).sin_addr), addr_IPv4, INET_ADDRSTRLEN) == nullptr)
             perror("inet_ntop");
         std::cout << "Address[" << i << "] = " << addr_IPv4 << std::endl;
@@ -26,11 +25,10 @@ void ArgumentParser::get_IPv4_elements(std::vector<struct sockaddr_in> vector_IP
 }
 
 ///< debug functions for printing vector contains the IPv6 addresses
-void ArgumentParser::get_IPv6_elements(std::vector<struct sockaddr_in6> vector_IPv6)
-{
+void ArgumentParser::get_IPv6_elements(std::vector<struct sockaddr_in6> vector_IPv6) {
     char addr_IPv6[INET6_ADDRSTRLEN];
     std::cout << "IPv6 Addresses: " << std::endl;
-    for(unsigned int i = 0; i < vector_IPv6.size(); i++) {
+    for (unsigned int i = 0; i < vector_IPv6.size(); i++) {
         if (inet_ntop(AF_INET6, &(vector_IPv6.at(i).sin6_addr), addr_IPv6, INET6_ADDRSTRLEN) == nullptr)
             perror("inet_ntop");
         std::cout << "Address[" << i << "] = " << addr_IPv6 << std::endl;
@@ -38,8 +36,7 @@ void ArgumentParser::get_IPv6_elements(std::vector<struct sockaddr_in6> vector_I
     std::cout << std::endl;
 }
 
-void ArgumentParser::print_arguments()
-{
+void ArgumentParser::print_arguments() {
     std::cout << "seconds: " << this->time_in_seconds << std::endl;
     std::cout << "---------------------------------" << std::endl;
 
@@ -54,15 +51,14 @@ void ArgumentParser::print_arguments()
     std::cout << "---------------------------------" << std::endl;
 
     std::cout << "Pcap files: " << std::endl;
-    for(unsigned int i = 0; i < this->pcap_files.size(); i++) {
+    for (unsigned int i = 0; i < this->pcap_files.size(); i++) {
         std::cout << "pcap_file no. " << i << ": " << this->pcap_files.at(i) << std::endl;
     }
 }
 
 
-void ArgumentParser::proccess_file_argument(const std::string& file_name)
-{
-    struct stat sb;
+void ArgumentParser::proccess_file_argument(const std::string &file_name) {
+    struct stat sb = {};
     if (stat(file_name.c_str(), &sb) == 0) {
         this->pcap_files.emplace_back(std::string(file_name));
     } else {
@@ -70,10 +66,9 @@ void ArgumentParser::proccess_file_argument(const std::string& file_name)
     }
 }
 
-struct AddressWrapper ArgumentParser::proccess_syslog_address(const std::string& addr)
-{
-    struct addrinfo *res, hint;
-    struct AddressWrapper address_wrapper;
+struct AddressWrapper ArgumentParser::proccess_syslog_address(const std::string &addr) {
+    struct addrinfo *res, hint = {};
+    struct AddressWrapper address_wrapper = {};
 
     memset(&hint, '\0', sizeof(hint));
     hint.ai_family = PF_UNSPEC;     /* Allow IPv4 or IPv6 */
@@ -86,9 +81,9 @@ struct AddressWrapper ArgumentParser::proccess_syslog_address(const std::string&
             std::cerr << "Invalid address/hostname of syslog_server: " << addr << std::endl;
         } else {
             if (he->h_addrtype == AF_INET) {
-                struct in_addr **addr_list = (struct in_addr **) he->h_addr_list;
+                auto addr_list = (struct in_addr **) he->h_addr_list;
                 for (int i = 0; addr_list[i]; i++) {
-                    struct sockaddr_in addr_IPv4;
+                    struct sockaddr_in addr_IPv4 = {};
                     addr_IPv4.sin_family = AF_INET;
                     memcpy(&addr_IPv4.sin_addr, addr_list[i], sizeof(&addr_list[i]));
                     address_wrapper.addr_IPv4.push_back(addr_IPv4);
@@ -96,7 +91,7 @@ struct AddressWrapper ArgumentParser::proccess_syslog_address(const std::string&
             } else if (he->h_addrtype == AF_INET6) {
                 struct in_addr6 **addr_list = (struct in_addr6 **) he->h_addr_list;
                 for (int i = 0; addr_list[i]; i++) {
-                    struct sockaddr_in6 addr_IPv6;
+                    struct sockaddr_in6 addr_IPv6 = {};
                     addr_IPv6.sin6_family = AF_INET6;
                     memcpy(&addr_IPv6.sin6_addr, addr_list[i], sizeof(&addr_list[i]));
                     address_wrapper.addr_IPv6.push_back(addr_IPv6);
@@ -104,7 +99,7 @@ struct AddressWrapper ArgumentParser::proccess_syslog_address(const std::string&
             }
         }
     } else if (res->ai_family == AF_INET) {
-        struct sockaddr_in addr_IPv4;
+        struct sockaddr_in addr_IPv4 = {};
         addr_IPv4.sin_family = AF_INET;
 
         s = inet_pton(AF_INET, addr.c_str(), &addr_IPv4.sin_addr);
@@ -118,7 +113,7 @@ struct AddressWrapper ArgumentParser::proccess_syslog_address(const std::string&
         address_wrapper.addr_IPv4.push_back(addr_IPv4);
         freeaddrinfo(res);  /* No longer needed */
     } else if (res->ai_family == AF_INET6) {
-        struct sockaddr_in6 addr_IPv6;
+        struct sockaddr_in6 addr_IPv6 = {};
         addr_IPv6.sin6_family = AF_INET6;
 
         s = inet_pton(AF_INET6, addr.c_str(), &addr_IPv6.sin6_addr);
@@ -131,22 +126,21 @@ struct AddressWrapper ArgumentParser::proccess_syslog_address(const std::string&
         address_wrapper.addr_IPv6.push_back(addr_IPv6);
         freeaddrinfo(res);  /* No longer needed */
     } else {
-        std::cerr << "getaddrinfo: " <<  gai_strerror(s) << std::endl;
+        std::cerr << "getaddrinfo: " << gai_strerror(s) << std::endl;
     }
     return address_wrapper;
 }
 
 
-void ArgumentParser::parse_arguments(int argc, char **argv)
-{
-    const char* const short_opts = "hr:i:s:t:";
+void ArgumentParser::parse_arguments(int argc, char **argv) {
+    const char *const short_opts = "hr:i:s:t:";
     const option long_opts[] = {
-            {"pcap_file", required_argument, nullptr, 'r'},
-            {"interface", required_argument, nullptr, 'i'},
+            {"pcap_file",     required_argument, nullptr, 'r'},
+            {"interface",     required_argument, nullptr, 'i'},
             {"syslog_server", required_argument, nullptr, 's'},
-            {"seconds", required_argument, nullptr, 't'},
-            {"help", no_argument, nullptr, 'h'},
-            {nullptr, 0, nullptr, 0},
+            {"seconds",       required_argument, nullptr, 't'},
+            {"help",          no_argument,       nullptr, 'h'},
+            {nullptr, 0,                         nullptr, 0},
     };
 
     int opt;

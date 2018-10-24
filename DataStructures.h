@@ -19,13 +19,13 @@
 #define DNS_ANS_TYPE_SPF        99
 
 
-#define NEXTHDR_HOP		    0	/* Hop-by-hop option header. */
-#define NEXTHDR_IPV6		41	/* IPv6 in IPv6 */
-#define NEXTHDR_ROUTING		43	/* Routing header. */
-#define NEXTHDR_FRAGMENT	44	/* Fragmentation/reassembly header. */
-#define NEXTHDR_AUTH		51	/* Authentication header. */
-#define NEXTHDR_DEST		60	/* Destination options header. */
-#define NEXTHDR_MOBILITY	135	/* Mobility header. */
+#define NEXTHDR_HOP            0    /* Hop-by-hop option header. */
+#define NEXTHDR_IPV6        41    /* IPv6 in IPv6 */
+#define NEXTHDR_ROUTING        43    /* Routing header. */
+#define NEXTHDR_FRAGMENT    44    /* Fragmentation/reassembly header. */
+#define NEXTHDR_AUTH        51    /* Authentication header. */
+#define NEXTHDR_DEST        60    /* Destination options header. */
+#define NEXTHDR_MOBILITY    135    /* Mobility header. */
 
 #define FOUR_OCTET_UNIT_TO_BYTES    2
 #define EIGHT_OCTET_UNIT_TO_BYTES   3
@@ -34,6 +34,7 @@
 #define IP_HEADER_MAX_LEN           60
 
 std::string decode_rr_type(int rr_type);
+
 std::string decode_algorithm(int algorithm);
 
 struct AddressWrapper {
@@ -48,62 +49,55 @@ struct udphdr {
     uint16_t checksum;
 };
 
-struct auth_hdr
-{
-    uint8_t  ip6h_nxt;		/* next header.  */
-    uint8_t  ip6h_len;		/* length in units of 8 octets.  */
+struct auth_hdr {
+    uint8_t ip6h_nxt;        /* next header.  */
+    uint8_t ip6h_len;        /* length in units of 8 octets.  */
     uint16_t ip6h_res;      /* reserved 2 bytes */
     uint32_t ip6h_spi;      /* security parameters index */
     /* followed by 32-bits sequence number */
     /* followed by authentication data with variable length */
 };
 
-struct ipv6_hbh
-{
-    uint8_t  ip6h_nxt;		/* next header.  */
-    uint8_t  ip6h_len;		/* length in units of 8 octets.  */
+struct ipv6_hbh {
+    uint8_t ip6h_nxt;        /* next header.  */
+    uint8_t ip6h_len;        /* length in units of 8 octets.  */
     uint16_t ip6h_opt;      /* options and padding */
     uint32_t ip6h_pad;      /* options and padding */
     /* can be followed by more options and padding */
 };
 
-struct ipv6_dest
-{
-    uint8_t  ip6d_nxt;		/* next header */
-    uint8_t  ip6d_len;		/* length in units of 8 octets */
+struct ipv6_dest {
+    uint8_t ip6d_nxt;        /* next header */
+    uint8_t ip6d_len;        /* length in units of 8 octets */
     uint16_t ip6h_opt;      /* options and padding */
     uint32_t ip6h_pad;      /* options and padding */
     /* can be followed by more options and padding */
 };
 
-struct ipv6_rthdr
-{
-    uint8_t  ip6r_nxt;		/* next header */
-    uint8_t  ip6r_len;		/* length in units of 8 octets */
-    uint8_t  ip6r_type;		/* routing type */
-    uint8_t  ip6r_segleft;	/* segments left */
+struct ipv6_rthdr {
+    uint8_t ip6r_nxt;        /* next header */
+    uint8_t ip6r_len;        /* length in units of 8 octets */
+    uint8_t ip6r_type;        /* routing type */
+    uint8_t ip6r_segleft;    /* segments left */
     uint32_t ip6r_data;     /* specific data */
     /* followed by routing type specific data */
 };
 
-struct ipv6_mobility
-{
-    uint8_t  ip6m_nxt;		/* next header */
-    uint8_t  ip6m_len;		/* length in units of 8 octets */
-    uint8_t  ip6m_type;		/* routing type */
-    uint8_t  ip6m_reserve;  /* reserving space */
+struct ipv6_mobility {
+    uint8_t ip6m_nxt;        /* next header */
+    uint8_t ip6m_len;        /* length in units of 8 octets */
+    uint8_t ip6m_type;        /* routing type */
+    uint8_t ip6m_reserve;  /* reserving space */
     uint16_t ip6m_checksum; /* checksum */
     uint16_t ip6m_data;     /* mandatory size of the data */
     /* can be followed by more data */
 };
 
-struct ns_preference
-{
+struct ns_preference {
     unsigned short preference;
 };
 
-struct soa_record
-{
+struct soa_record {
     uint32_t serial;
     uint32_t refresh;
     uint32_t retry;
@@ -111,9 +105,8 @@ struct soa_record
     uint32_t min_ttl;
 };
 
-struct __attribute__((__packed__)) rrsig_record
-{
-    uint16_t  type_covered;
+struct __attribute__((__packed__)) rrsig_record {
+    uint16_t type_covered;
     uint8_t algorithm;
     uint8_t labels;
     uint32_t orig_ttl;
@@ -122,27 +115,23 @@ struct __attribute__((__packed__)) rrsig_record
     uint16_t key_tag;
 };
 
-struct ds_record
-{
+struct ds_record {
     uint16_t key_id;
     uint8_t algorithm;
     uint8_t digest_type;
 };
 
-struct srv_record
-{
-    uint16_t  priority;
+struct srv_record {
+    uint16_t priority;
     uint16_t weight;
     uint16_t port;
 };
 
-struct nsec_record
-{
+struct nsec_record {
     uint16_t bit_maps_count;
 };
 
-struct __attribute__((__packed__)) nsec3_record
-{
+struct __attribute__((__packed__)) nsec3_record {
     uint8_t algorithm;
 # if __BYTE_ORDER == __LITTLE_ENDIAN
     uint8_t opt_out :1;
@@ -156,8 +145,7 @@ struct __attribute__((__packed__)) nsec3_record
     uint8_t salt_length;
 }; // +1
 
-struct dnskey_record
-{
+struct dnskey_record {
 # if __BYTE_ORDER == __LITTLE_ENDIAN
     uint8_t zone_key :1;
     uint8_t a1 :7;
@@ -181,36 +169,35 @@ struct dnskey_record
  *                  creating the head of DNS messages for communication
  *                  with the DNS server.
  */
-struct DNS_HEADER
-{
+struct DNS_HEADER {
     uint16_t ID;          ///< 16 bit identifier assigned by the program
 
-    # if __BYTE_ORDER == __LITTLE_ENDIAN
-        uint8_t RD :1;        ///< Recursion Desired
-        uint8_t TC :1;        ///< TrunCation
-        uint8_t AA :1;        ///< Authorirative Answer
-        uint8_t OPCODE :4;    ///< 4 bit field that species kind of query
-        uint8_t QR :1;        ///< Query or Response message
+# if __BYTE_ORDER == __LITTLE_ENDIAN
+    uint8_t RD :1;        ///< Recursion Desired
+    uint8_t TC :1;        ///< TrunCation
+    uint8_t AA :1;        ///< Authorirative Answer
+    uint8_t OPCODE :4;    ///< 4 bit field that species kind of query
+    uint8_t QR :1;        ///< Query or Response message
 
-        uint8_t RCODE  :4;    ///< 4 bit field is set as part of responses
-        uint8_t CD :1;        ///< Checking Disabled
-        uint8_t AD :1;        ///< Authenticated Data
-        uint8_t Z  :1;        ///< Reserver for the future use
-        uint8_t RA :1;        ///< Recursion Available
-    # endif
-    # if __BYTE_ORDER == __BIG_ENDIAN
-        uint8_t QR :1;        ///< Query or Response message
-        uint8_t OPCODE :4;    ///< 4 bit field that species kind of query
-        uint8_t AA :1;        ///< Authorirative Answer
-        uint8_t TC :1;        ///< TrunCation
-        uint8_t RD :1;        ///< Recursion Desired
+    uint8_t RCODE  :4;    ///< 4 bit field is set as part of responses
+    uint8_t CD :1;        ///< Checking Disabled
+    uint8_t AD :1;        ///< Authenticated Data
+    uint8_t Z  :1;        ///< Reserver for the future use
+    uint8_t RA :1;        ///< Recursion Available
+# endif
+# if __BYTE_ORDER == __BIG_ENDIAN
+    uint8_t QR :1;        ///< Query or Response message
+    uint8_t OPCODE :4;    ///< 4 bit field that species kind of query
+    uint8_t AA :1;        ///< Authorirative Answer
+    uint8_t TC :1;        ///< TrunCation
+    uint8_t RD :1;        ///< Recursion Desired
 
-        uint8_t RA :1;        ///< Recursion Available
-        uint8_t Z  :1;        ///< Reserver for the future use
-        uint8_t AD :1;        ///< Authenticated Data
-        uint8_t CD :1;        ///< Checking Disabled
-        uint8_t RCODE  :4;    ///< 4 bit field is set as part of responses
-    # endif
+    uint8_t RA :1;        ///< Recursion Available
+    uint8_t Z  :1;        ///< Reserver for the future use
+    uint8_t AD :1;        ///< Authenticated Data
+    uint8_t CD :1;        ///< Checking Disabled
+    uint8_t RCODE  :4;    ///< 4 bit field is set as part of responses
+# endif
 
     uint16_t QDCOUNT;     ///< number of entries in the question section.
     uint16_t ANCOUNT;     ///< number of resource records in the answer section.
@@ -222,8 +209,7 @@ struct DNS_HEADER
  * @brief           The structure for definition the Question format used to
  *                  carry the "question" in most queries.
  */
-struct QUESTION_FORMAT
-{
+struct QUESTION_FORMAT {
     uint16_t QTYPE;       ///< two octet code which specifies the type of the query
     uint16_t QCLASS;      ///< two octet code that specifies the class of the query
 };
@@ -234,8 +220,7 @@ struct QUESTION_FORMAT
  * @brief           The structure for Resource record format. All sections
  *                  (answer, authority, additional) share the same format.
  */
-struct __attribute__((__packed__)) RESOURCE_FORMAT
-{
+struct __attribute__((__packed__)) RESOURCE_FORMAT {
     uint16_t TYPE;        ///< two octets containing one of the RR type codes
     uint16_t CLASS;       ///< two octets which specify the class of the data in the RDATA field
     uint32_t TTL;           ///< a 32 bit unsigned integer that specifies the time interval (in seconds)

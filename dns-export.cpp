@@ -1,6 +1,3 @@
-#include <iostream>
-#include <csignal>
-
 #include "DnsExport.h"
 
 // https://www.tutorialspoint.com/cplusplus/cpp_signal_handling.htm
@@ -18,7 +15,7 @@ void signalHandler(int signum) {
     }
 }
 
-int main (int argc, char **argv) {
+int main(int argc, char **argv) {
     signal(SIGUSR1, signalHandler);
     dns_export.run(argc, argv);
 }

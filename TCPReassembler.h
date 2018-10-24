@@ -21,20 +21,24 @@
 
 using namespace std;
 
-class TCPReassembler: public DnsExport
-{
-    public:
-        TCPReassembler();
-        ~TCPReassembler();
+class TCPReassembler : public DnsExport {
+public:
+    TCPReassembler();
 
-        unsigned int tcp_segment_length = 0;
-        uint32_t tcp_sequence_number;
-        uint16_t dns_length;
-        uint16_t summary_length = 0;
-        uint32_t last_packet_length = 0;
+    ~TCPReassembler();
 
-        std::vector<const unsigned char*> reassembling_packets(std::vector<const unsigned char*> tcp_packets);
-        u_char* parse_transport_protocol(const unsigned char* packet, unsigned offset, u_int8_t protocol, bool tcp_parse) override;
+    unsigned int tcp_segment_length = 0;
+    uint32_t tcp_sequence_number;
+    uint16_t dns_length;
+    uint16_t summary_length = 0;
+    uint32_t last_packet_length = 0;
+    uint32_t packet_hdr_len = 0;
+
+    std::vector<std::pair<const unsigned char *, const unsigned char **>>
+    reassembling_packets(std::vector<std::pair<const unsigned char *, const unsigned char **>> tcp_packets);
+
+    unsigned char *
+    parse_transport_protocol(const unsigned char *packet, unsigned offset, u_int8_t protocol, bool tcp_parse) override;
 };
 
 #endif //TCPREASSEMBLER_H

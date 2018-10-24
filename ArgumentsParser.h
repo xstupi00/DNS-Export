@@ -11,25 +11,29 @@
 
 #include "DataStructures.h"
 
-class ArgumentParser
-{
-    public:
-        ArgumentParser();
-        ~ArgumentParser();
+class ArgumentParser {
+public:
+    ArgumentParser();
 
-        std::vector<std::string> pcap_files;
-        std::vector<struct AddressWrapper> syslog_server_addr;
-        std::string interface_name = "";
-        double time_in_seconds = 60.0;
+    ~ArgumentParser();
 
-        void parse_arguments(int argc, char**argv);
-        void print_arguments();
+    std::vector<std::string> pcap_files;
+    std::vector<struct AddressWrapper> syslog_server_addr;
+    std::string interface_name = "";
+    double time_in_seconds = 60.0;
 
-    private:
-        void proccess_file_argument(const std::string& file_name);
-        void get_IPv4_elements(std::vector<struct sockaddr_in> vector_IPv4);
-        void get_IPv6_elements(std::vector<struct sockaddr_in6> vector_IPv6);
-        struct AddressWrapper proccess_syslog_address(const std::string& addr);
+    void parse_arguments(int argc, char **argv);
+
+    void print_arguments();
+
+private:
+    void proccess_file_argument(const std::string &file_name);
+
+    void get_IPv4_elements(std::vector<struct sockaddr_in> vector_IPv4);
+
+    void get_IPv6_elements(std::vector<struct sockaddr_in6> vector_IPv6);
+
+    struct AddressWrapper proccess_syslog_address(const std::string &addr);
 };
 
 
