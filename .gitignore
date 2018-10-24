@@ -5,3 +5,10 @@
 .idea/
 cmake-build-debug/
 CMakeLists.txt
+
+## pcap files
+*.pcap
+*.cap
+
+## output files
+*.txt
