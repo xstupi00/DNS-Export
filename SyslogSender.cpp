@@ -1,3 +1,5 @@
+#include <iostream>
+#include <sstream>
 #include "SyslogSender.h"
 #include "DataStructures.h"
 
@@ -110,14 +112,14 @@ long SyslogSender::get_first_proc_id_by_name(std::string proc_name) {
     return pid;
 }
 
-std::stringstream SyslogSender::create_header() {
+std::string SyslogSender::create_header() {
     std::string app_name = "dns-export";
     std::stringstream msg;
     msg << "<" << LOG_MAKEPRI(LOG_LOCAL0, LOG_INFO) << ">1 " << this->generate_timestamp() << " "
         << this->get_local_hostname() << " " << app_name << " " << this->get_first_proc_id_by_name(app_name)
         << " - - ";
 
-    return msg;
+    return msg.str();
 }
 
 void SyslogSender::send_msg_to_server(std::vector<struct AddressWrapper> syslog_servers, std::string msg) {
@@ -156,13 +158,14 @@ void SyslogSender::send_msg_to_server(std::vector<struct AddressWrapper> syslog_
 void SyslogSender::sending_stats(std::vector<struct AddressWrapper> syslog_servers,
                                  std::unordered_map<std::string, int> stats) {
 
-    std::stringstream msg = this->create_header();
+    std::string msg = this->create_header();
     for (std::pair<std::string, int> stats_item : stats) {
-        if (msg.str().size() + stats_item.first.size() + sizeof(int) <= 1000) { // 1KB
-            msg << stats_item.first << " " << stats_item.second << std::endl;
+        if (msg.size() + stats_item.first.size() + sizeof(int) <= 1000) { // 1KB
+            msg += stats_item.first + " ";
+            msg += stats_item.second + "\n";
         } else {
-            this->send_msg_to_server(syslog_servers, msg.str());
-            std::cout << msg.str() << std::endl;
+            this->send_msg_to_server(syslog_servers, msg);
+            std::cout << msg << std::endl;
             msg = this->create_header();
         }
     }

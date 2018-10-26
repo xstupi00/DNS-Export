@@ -1,3 +1,5 @@
+#include <sstream>
+#include <iomanip>
 #include "DnsExport.h"
 #include "ArgumentsParser.h"
 #include "TCPReassembler.h"
@@ -325,7 +327,7 @@ char *DnsExport::transform_utc_time(const uint32_t utc_time) {
     return outstr;
 }
 
-std::stringstream DnsExport::proccess_bits_array(unsigned char *record_payload) {
+std::string DnsExport::proccess_bits_array(unsigned char *record_payload) {
     std::stringstream result;
 
     if (std::addressof(record_payload) + sizeof(struct nsec_record) <= (unsigned char **) this->end_addr) {
@@ -353,7 +355,7 @@ std::stringstream DnsExport::proccess_bits_array(unsigned char *record_payload) 
         }
     }
 
-    return result;
+    return result.str();
 }
 
 
@@ -496,7 +498,7 @@ std::string DnsExport::decode_dns_record(
             if (domain_name) {
                 result << "NSEC " << domain_name;
                 record_payload += offset;
-                std::string bits_arr = this->proccess_bits_array(record_payload).str();
+                std::string bits_arr = this->proccess_bits_array(record_payload);
                 if (!bits_arr.empty()) result << bits_arr;
             }
 
@@ -584,7 +586,7 @@ std::string DnsExport::decode_dns_record(
                                 }
                                 record_payload += sizeof(uint8_t);
                             }
-                            std::string bits_arr = this->proccess_bits_array(record_payload).str();
+                            std::string bits_arr = this->proccess_bits_array(record_payload);
                             if (!bits_arr.empty()) result << std::dec << bits_arr;
                         }
                     }

@@ -57,7 +57,7 @@ public:
 
     void proccess_tcp_packets();
 
-    std::stringstream proccess_bits_array(unsigned char *record_payload);
+    std::string proccess_bits_array(unsigned char *record_payload);
 
     void sniffing_interface(std::string device_name, double time_in_seconds, std::vector<AddressWrapper> syslog_addr);
 
