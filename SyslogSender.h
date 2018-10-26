@@ -1,8 +1,6 @@
 #ifndef SYSLOGSENDER_H
 #define SYSLOGSENDER_H
 
-#include <iostream>
-#include <sstream>
 #include <unordered_map>
 #include <ifaddrs.h>
 #include <arpa/inet.h>
@@ -13,7 +11,7 @@
 #include <dirent.h>
 #include <sys/time.h>
 #include <fstream>
-
+#include <vector>
 
 class SyslogSender {
 public:

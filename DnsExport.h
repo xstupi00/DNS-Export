@@ -5,11 +5,19 @@
 #include <vector>
 #include <ctime>
 #include <unordered_map>
-#include <iomanip>
 #include <pcap.h>
 #include "ArgumentsParser.h"
 #include <iostream>
 #include <csignal>
+#include <cmath>
+
+#ifndef __FAVOR_BSD
+#define __FAVOR_BSD
+#endif
+#ifndef NETINET_TCP_H
+#include <netinet/tcp.h>
+#define NETINET_TCP_H
+#endif
 
 
 class DnsExport {

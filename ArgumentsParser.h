@@ -2,9 +2,8 @@
 #define ARGUMENTSPARSER_H
 
 #include <arpa/inet.h>
-#include <cstring>
+#include <string>
 #include <getopt.h>
-#include <iostream>
 #include <netdb.h>
 #include <sys/stat.h>
 #include <vector>

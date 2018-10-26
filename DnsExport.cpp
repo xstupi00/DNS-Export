@@ -84,7 +84,7 @@ void DnsExport::sniffing_interface(std::string device_name, double time_in_secon
             }
         }
         diff = difftime(time(&end), start);
-        if (isgreaterequal(diff, time_in_seconds)) {
+        if (std::isgreaterequal(diff, time_in_seconds)) {
             std::cout << "SEND TIME = " << diff << endl;
             SyslogSender syslog_sender;
             syslog_sender.sending_stats(syslog_addr, this->stats);

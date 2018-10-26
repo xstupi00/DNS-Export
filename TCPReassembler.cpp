@@ -41,7 +41,7 @@ unsigned char *TCPReassembler::parse_transport_protocol(const unsigned char *pac
             if (!tcp_parse) {
                 if (std::addressof(packet) + sizeof(struct ether_header) + offset +
                     (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES) <= this->end_addr) {
-                    this->tcp_sequence_number = ntohl(tcp_header->seq);
+                    this->tcp_sequence_number = ntohl(tcp_header->th_seq);
                     this->tcp_segment_length = total - offset - (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES);
                     payload = (unsigned char *) (packet + sizeof(struct ether_header) + offset +
                                                  (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES));
@@ -53,10 +53,10 @@ unsigned char *TCPReassembler::parse_transport_protocol(const unsigned char *pac
                             sizeof(struct ether_header) + offset + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES);
                 }
             } else {
-                if (ntohl(tcp_header->seq) == this->tcp_sequence_number + tcp_segment_length) {
+                if (ntohl(tcp_header->th_seq) == this->tcp_sequence_number + tcp_segment_length) {
                     if (std::addressof(packet) + sizeof(struct ether_header) + offset +
                         (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES) <= this->end_addr) {
-                        this->tcp_sequence_number = ntohl(tcp_header->seq);
+                        this->tcp_sequence_number = ntohl(tcp_header->th_seq);
                         this->tcp_segment_length = total - offset - (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES);
                         payload = (unsigned char *) (packet + sizeof(struct ether_header) + offset +
                                                      (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES));
@@ -100,7 +100,7 @@ TCPReassembler::reassembling_packets(
                     memcpy((unsigned char *) reassembled_packet, tcp_packet.first,
                            ntohs(ipHeader->ip_len) + sizeof(struct ether_header));
 
-                    long j = distance(&tcp_packets[0], &tcp_packet) + 1;///< in-order byte stream
+                    auto j = (unsigned int) distance(&tcp_packets[0], &tcp_packet) + 1;///< in-order byte stream
                     while (this->summary_length < this->dns_length && j < tcp_packets.size()) {
                         this->end_addr = tcp_packets.at(j).second;
 

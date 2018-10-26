@@ -15,7 +15,14 @@
 #include <netinet/ip.h>
 #include <netinet/ether.h>
 #include <vector>
+
+#ifndef __FAVOR_BSD
+#define __FAVOR_BSD
+#endif
+#ifndef NETINET_TCP_H
 #include <netinet/tcp.h>
+#define NETINET_TCP_H
+#endif
 
 #include "DnsExport.h"
 
@@ -28,11 +35,11 @@ public:
     ~TCPReassembler();
 
     unsigned int tcp_segment_length = 0;
-    uint32_t tcp_sequence_number;
+    unsigned int tcp_sequence_number;
     uint16_t dns_length;
     uint16_t summary_length = 0;
-    uint32_t last_packet_length = 0;
-    uint32_t packet_hdr_len = 0;
+    unsigned int last_packet_length = 0;
+    unsigned int packet_hdr_len = 0;
 
     std::vector<std::pair<const unsigned char *, const unsigned char **>>
     reassembling_packets(std::vector<std::pair<const unsigned char *, const unsigned char **>> tcp_packets);
