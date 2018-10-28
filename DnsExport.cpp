@@ -1,6 +1,3 @@
-#include <sstream>
-#include <iomanip>
-#include <zconf.h>
 #include "DnsExport.h"
 #include "ArgumentsParser.h"
 #include "TCPReassembler.h"
@@ -32,19 +29,20 @@ void DnsExport::parse_pcap_file(const char *pcap_file_name) {
     /* Open the session in promiscuous mode */
     pcap_t *handle = pcap_open_offline(pcap_file_name, errbuff);
     if (handle == nullptr) {
-        std::cerr << "Couldn't open file:" << endl;
+        std::cerr << "Couldn't open file:" << pcap_geterr(handle) << endl;
     }
 
     // compile the filter
-    if (pcap_compile(handle, &fp, filter_exp, 0, 0) == -1)
-        std::cerr << "pcap_compile() failed" << endl;
+    if (pcap_compile(handle, &fp, filter_exp, 0, 0) == -1) {
+        std::cerr << "pcap_compile(): " << pcap_geterr(handle) << endl;
+    }
 
     // set the filter to the packet capture handle
-    if (pcap_setfilter(handle, &fp) == -1)
-        std::cerr << "pcap_setfilter() failed" << endl;
+    if (pcap_setfilter(handle, &fp) == -1) {
+        std::cerr << "pcap_setfilter(): " << pcap_geterr(handle) << endl;
+    }
 
     this->link_type = pcap_datalink(handle);
-
     while ((packet = pcap_next(handle, &header)) != nullptr) {
         if (header.len > header.caplen) continue;
 
@@ -63,26 +61,24 @@ void DnsExport::sniffing_interface(std::string device_name, std::vector<AddressW
     struct bpf_program fp = {};        /* The compiled filter expression */
     char filter_exp[] = "src port 53";    /* The filter expression */
 
-
     /* Open the session in promiscuous mode */
     std::cout << "Open device: " << device_name << endl;
     pcap_t *handle = pcap_open_live(device_name.c_str(), BUFSIZ, 1, 1000, errbuf);
     if (handle == nullptr) {
-        fprintf(stderr, "Couldn't open device %s: %s\n", device_name.c_str(), errbuf);
+        std::cerr << "Couldn't open device " << device_name << " :" << pcap_geterr(handle) << endl;
     }
 
     // compile the filter
     if (pcap_compile(handle, &fp, filter_exp, 0, PCAP_NETMASK_UNKNOWN) == -1) {
-        std::cerr << "pcap_compile() failed" << endl;
+        std::cerr << "pcap_compile():" << pcap_geterr(handle) << endl;
     }
 
     // set the filter to the packet capture handle
     if (pcap_setfilter(handle, &fp) == -1) {
-        std::cerr << "pcap_setfilter() failed" << endl;
+        std::cerr << "pcap_setfilter()" << pcap_geterr(handle) << endl;
     }
 
     this->link_type = pcap_datalink(handle);
-
     for (;;) {
         while (((packet = pcap_next(handle, &header)) != nullptr)) {
             if (header.len > header.caplen) continue;

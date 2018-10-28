@@ -4,6 +4,8 @@
 
 
 std::string decode_rr_type(int rr_type) {
+    if (rr_type >= 65280 and rr_type <= 65534) rr_type = 65280;
+
     switch (rr_type) {
         case 1: return "A";
         case 2: return "NS";
@@ -56,15 +58,27 @@ std::string decode_rr_type(int rr_type) {
         case 49: return "DHCID";
         case 50: return "NSEC3";
         case 51: return "NSEC3PARAM";
+        case 52: return "TLSA";
+        case 53: return "SMIMEA";
         case 55: return "HIP";
         case 56: return "NIFO";
         case 57: return "RKEY";
         case 58: return "TALINK";
+        case 59: return "CDS";
+        case 60: return "CDSKEY";
+        case 61: return "OPENPGPKEY";
+        case 62: return "CSYNC";
         case 99: return "SPF";
         case 100: return "UINFO";
         case 101: return "UID";
         case 102: return "GID";
         case 103: return "UNSPEC";
+        case 104: return "NID";
+        case 105: return "L32";
+        case 106: return "L64";
+        case 107: return "LP";
+        case 108: return "EUI48";
+        case 109: return "EUI64";
         case 249: return "TKEY";
         case 250: return "TSIG";
         case 251: return "IXFR";
@@ -72,19 +86,21 @@ std::string decode_rr_type(int rr_type) {
         case 253: return "MAILB";
         case 254: return "MAILA";
         case 255: return "ANY";
-        case 65280: return "UNKNOWN";
-        default: return "UNKNOWN";
+        case 256: return "URI";
+        case 257: return "CAA";
+        case 258: return "AVC";
+        case 259: return "DOA";
+        case 32768: return "TA";
+        case 32769: return "DLV";
+        case 65280: return "PRIVATE";
+        case 65535: return "RESERVED";
+        default: return "UNASSIGNED";
     }
 }
 
 std::string decode_algorithm(int algorithm) {
-    if (algorithm >= 17 and algorithm <= 122) {
-        algorithm = 17;
-    }
-
-    if (algorithm >= 123 and algorithm <= 251) {
-        algorithm = 123;
-    }
+    if (algorithm >= 17 and algorithm <= 122) algorithm = 17;
+    if (algorithm >= 123 and algorithm <= 251) algorithm = 123;
 
     switch (algorithm) {
         case 0: return "DELETE";

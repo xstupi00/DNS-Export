@@ -15,6 +15,7 @@
 #include <netinet/ip.h>
 #include <netinet/ether.h>
 #include <vector>
+#include <iomanip>
 
 #ifndef __FAVOR_BSD
 #define __FAVOR_BSD

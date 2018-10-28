@@ -1,11 +1,4 @@
-#include <cstring>
-#include <iostream>
 #include "ArgumentsParser.h"
-#include <linux/if_ether.h>
-#include <ifaddrs.h>
-#include <net/if.h>
-#include <sys/ioctl.h>
-#include <zconf.h>
 
 
 /**

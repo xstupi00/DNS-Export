@@ -7,6 +7,9 @@
 #include <netdb.h>
 #include <sys/stat.h>
 #include <vector>
+#include <cstring>
+#include <iostream>
+#include <net/if.h>
 
 #include "DataStructures.h"
 

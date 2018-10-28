@@ -10,6 +10,9 @@
 #include <iostream>
 #include <csignal>
 #include <cmath>
+#include <sstream>
+#include <iomanip>
+#include <zconf.h>
 
 #ifndef __FAVOR_BSD
 #define __FAVOR_BSD
