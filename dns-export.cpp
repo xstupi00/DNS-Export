@@ -1,3 +1,4 @@
+#include <zconf.h>
 #include "DnsExport.h"
 
 // https://www.tutorialspoint.com/cplusplus/cpp_signal_handling.htm
@@ -6,7 +7,7 @@ using namespace std;
 
 DnsExport dns_export;
 
-void signalHandler(int signum) {
+void signal_handler(int signum) {
     std::cout << "Interrupt signal (" << signum << ") received" << endl;
 
     dns_export.proccess_tcp_packets();
@@ -16,6 +17,6 @@ void signalHandler(int signum) {
 }
 
 int main(int argc, char **argv) {
-    signal(SIGUSR1, signalHandler);
+    signal(SIGUSR1, signal_handler);
     dns_export.run(argc, argv);
 }

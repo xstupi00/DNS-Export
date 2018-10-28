@@ -30,7 +30,8 @@ public:
     std::unordered_map<std::string, int> stats;
     std::vector<int> dns_ids;
     const unsigned char **end_addr;
-
+    int link_type;
+    size_t ip_total_len = 0;
 
     void run(int argc, char **argv);
 
@@ -46,12 +47,12 @@ public:
 
     void proccess_next_header(const unsigned char *ipv6_header, uint8_t *next_header, unsigned *offset);
 
-    unsigned char *parse_IPv4_packet(const unsigned char *packet, bool tcp_parse);
+    unsigned char *parse_IPv4_packet(const unsigned char *packet, size_t offset, bool tcp_parse);
 
-    unsigned char *parse_IPv6_packet(const unsigned char *packet, bool tcp_parse);
+    unsigned char *parse_IPv6_packet(const unsigned char *packet, size_t offset, bool tcp_parse);
 
     virtual unsigned char *
-    parse_transport_protocol(const unsigned char *packet, unsigned offset, u_int8_t protocol, bool tcp_parse);
+    parse_transport_protocol(const unsigned char *packet, size_t offset, u_int8_t protocol, bool tcp_parse);
 
     char *transform_utc_time(const uint32_t utc_time);
 
@@ -59,7 +60,7 @@ public:
 
     std::string proccess_bits_array(unsigned char *record_payload);
 
-    void sniffing_interface(std::string device_name, double time_in_seconds, std::vector<AddressWrapper> syslog_addr);
+    void sniffing_interface(std::string device_name, std::vector<AddressWrapper> syslog_addr);
 
     void parse_pcap_file(const char *pcap_file_name);
 };

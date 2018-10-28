@@ -19,7 +19,7 @@ public:
     std::vector<std::string> pcap_files;
     std::vector<struct AddressWrapper> syslog_server_addr;
     std::string interface_name = "";
-    double time_in_seconds = 60.0;
+    unsigned int time_in_seconds = 60;
 
     void parse_arguments(int argc, char **argv);
 
@@ -33,6 +33,8 @@ private:
     void get_IPv6_elements(std::vector<struct sockaddr_in6> vector_IPv6);
 
     struct AddressWrapper proccess_syslog_address(const std::string &addr);
+
+    bool is_interface_online();
 };
 
 

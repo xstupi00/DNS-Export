@@ -30,22 +30,22 @@ using namespace std;
 
 class TCPReassembler : public DnsExport {
 public:
-    TCPReassembler();
+    TCPReassembler(int link_type);
 
     ~TCPReassembler();
 
-    unsigned int tcp_segment_length = 0;
+    size_t tcp_segment_length = 0;
     unsigned int tcp_sequence_number;
-    uint16_t dns_length;
-    uint16_t summary_length = 0;
-    unsigned int last_packet_length = 0;
-    unsigned int packet_hdr_len = 0;
+    size_t dns_length;
+    size_t summary_length = 0;
+    size_t last_packet_length = 0;
+    size_t packet_hdr_len = 0;
 
     std::vector<std::pair<const unsigned char *, const unsigned char **>>
     reassembling_packets(std::vector<std::pair<const unsigned char *, const unsigned char **>> tcp_packets);
 
     unsigned char *
-    parse_transport_protocol(const unsigned char *packet, unsigned offset, u_int8_t protocol, bool tcp_parse) override;
+    parse_transport_protocol(const unsigned char *packet, size_t offset, u_int8_t protocol, bool tcp_parse) override;
 };
 
 #endif //TCPREASSEMBLER_H

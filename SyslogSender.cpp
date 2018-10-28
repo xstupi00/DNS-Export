@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <zconf.h>
 #include "SyslogSender.h"
 #include "DataStructures.h"
 
@@ -124,7 +125,7 @@ std::string SyslogSender::create_header() {
 
 void SyslogSender::send_msg_to_server(std::vector<struct AddressWrapper> syslog_servers, std::string msg) {
 
-    //std::cout << "SENDING MSG = " << msg.size() << std::endl;
+    std::cout << "SENDING MSG = " << msg.size() << std::endl;
 
     for (struct AddressWrapper &syslog_server : syslog_servers) {
         if (!syslog_server.addr_IPv4.empty()) {
@@ -157,17 +158,30 @@ void SyslogSender::send_msg_to_server(std::vector<struct AddressWrapper> syslog_
 
 void SyslogSender::sending_stats(std::vector<struct AddressWrapper> syslog_servers,
                                  std::unordered_map<std::string, int> stats) {
-
-    std::string msg = this->create_header();
+    std::string header = this->create_header();
+    std::stringstream msg;
+    msg << header;
+    bool not_send = true;
     for (std::pair<std::string, int> stats_item : stats) {
-        if (msg.size() + stats_item.first.size() + sizeof(int) <= 1000) { // 1KB
-            msg += stats_item.first + " ";
-            msg += stats_item.second + "\n";
+        not_send = true;
+        if (msg.str().size() + stats_item.first.size() + sizeof(int) <= 1024) { // 1KiB
+            msg << stats_item.first << " " << stats_item.second << std::endl;
         } else {
-            this->send_msg_to_server(syslog_servers, msg);
-            std::cout << msg << std::endl;
-            msg = this->create_header();
+            this->send_msg_to_server(syslog_servers, msg.str());
+            std::cout << msg.str() << std::endl;
+            header = this->create_header();
+            msg.str(""); msg.clear();
+            msg << header << stats_item.first << " " << stats_item.second << std::endl;
+            not_send = false;
         }
     }
+    if (not_send) {
+        this->send_msg_to_server(syslog_servers, msg.str());
+        std::cout << msg.str() << std::endl;
+    }
+
+    //std::cout << "I'm going to sleep (10 seconds). Good night Simon" << std::endl;
+    //sleep(10);
+    //std::cout << "Good morning Simon!" << std::endl;
 }
 

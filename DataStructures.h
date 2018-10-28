@@ -33,6 +33,9 @@
 #define IPv6_HEADER_LEN             40
 #define IP_HEADER_MAX_LEN           60
 
+#define LINKTYPE_LINUX_SLL          113
+#define LINKTYPE_ETHERNET           1
+
 std::string decode_rr_type(int rr_type);
 
 std::string decode_algorithm(int algorithm);
@@ -40,6 +43,14 @@ std::string decode_algorithm(int algorithm);
 struct AddressWrapper {
     std::vector<struct sockaddr_in> addr_IPv4;
     std::vector<struct sockaddr_in6> addr_IPv6;
+};
+
+struct __attribute__((__packed__)) linux_sll {
+    uint16_t packet_type;
+    uint16_t arphrd_type;
+    uint16_t addr_length;
+    uint64_t addr;
+    uint16_t protocol_type;
 };
 
 struct udphdr {

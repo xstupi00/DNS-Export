@@ -1,9 +1,14 @@
 #include <sstream>
 #include <iomanip>
+#include <zconf.h>
 #include "DnsExport.h"
 #include "ArgumentsParser.h"
 #include "TCPReassembler.h"
 #include "SyslogSender.h"
+
+unsigned int time_in_sec = 0;
+std::vector<struct AddressWrapper> syslog_server_addr;
+std::unordered_map<std::string, int> stats1;
 
 /**
 * Default Contructor.
@@ -16,11 +21,12 @@ DnsExport::DnsExport() = default;
 */
 DnsExport::~DnsExport() = default;
 
+
 void DnsExport::parse_pcap_file(const char *pcap_file_name) {
     char errbuff[PCAP_ERRBUF_SIZE];    /* Error string */
     const unsigned char *packet;
-    struct pcap_pkthdr header = {};
-    struct bpf_program fp = {};        /* The compiled filter expression */
+    struct pcap_pkthdr header;
+    struct bpf_program fp;        /* The compiled filter expression */
     char filter_exp[] = "src port 53";    /* The filter expression */
 
     /* Open the session in promiscuous mode */
@@ -37,6 +43,8 @@ void DnsExport::parse_pcap_file(const char *pcap_file_name) {
     if (pcap_setfilter(handle, &fp) == -1)
         std::cerr << "pcap_setfilter() failed" << endl;
 
+    this->link_type = pcap_datalink(handle);
+
     while ((packet = pcap_next(handle, &header)) != nullptr) {
         if (header.len > header.caplen) continue;
 
@@ -48,8 +56,7 @@ void DnsExport::parse_pcap_file(const char *pcap_file_name) {
     }
 }
 
-void DnsExport::sniffing_interface(std::string device_name, double time_in_seconds,
-                                   std::vector<AddressWrapper> syslog_addr) {
+void DnsExport::sniffing_interface(std::string device_name, std::vector<AddressWrapper> syslog_addr) {
     char errbuf[PCAP_ERRBUF_SIZE];    /* Error string */
     const unsigned char *packet;
     struct pcap_pkthdr header = {};
@@ -58,10 +65,12 @@ void DnsExport::sniffing_interface(std::string device_name, double time_in_secon
 
 
     /* Open the session in promiscuous mode */
-    pcap_t *handle = pcap_open_live(device_name.c_str(), BUFSIZ, 1, 10000, errbuf);
+    std::cout << "Open device: " << device_name << endl;
+    pcap_t *handle = pcap_open_live(device_name.c_str(), BUFSIZ, 1, 1000, errbuf);
     if (handle == nullptr) {
         fprintf(stderr, "Couldn't open device %s: %s\n", device_name.c_str(), errbuf);
     }
+
 
     // compile the filter
     if (pcap_compile(handle, &fp, filter_exp, 0, PCAP_NETMASK_UNKNOWN) == -1) {
@@ -73,23 +82,17 @@ void DnsExport::sniffing_interface(std::string device_name, double time_in_secon
         std::cerr << "pcap_setfilter() failed" << endl;
     }
 
-    time_t start, end;
-    double diff = 0;
-    time(&start);
+    this->link_type = pcap_datalink(handle);
+
     for (;;) {
         while (((packet = pcap_next(handle, &header)) != nullptr)) {
             if (header.len > header.caplen) continue;
 
+            this->end_addr = std::addressof(packet) + header.caplen;
             u_char *payload = this->my_pcap_handler(packet, false);
             if (payload) {
                 this->parse_payload(payload, false);
             }
-        }
-        diff = difftime(time(&end), start);
-        if (std::isgreaterequal(diff, time_in_seconds)) {
-            std::cout << "SEND TIME = " << diff << endl;
-            SyslogSender syslog_sender;
-            syslog_sender.sending_stats(syslog_addr, this->stats);
         }
     }
 }
@@ -222,12 +225,12 @@ void DnsExport::proccess_next_header(const unsigned char *ipv6_header, uint8_t *
 }
 
 unsigned char *
-DnsExport::parse_transport_protocol(const unsigned char *packet, unsigned offset, u_int8_t protocol, bool tcp_parse) {
+DnsExport::parse_transport_protocol(const unsigned char *packet, size_t offset, u_int8_t protocol, bool tcp_parse) {
     unsigned char *payload = nullptr;
 
     if (protocol == IPPROTO_TCP and
-        std::addressof(packet) + sizeof(struct ether_header) + offset + sizeof(tcphdr) <= this->end_addr) {
-        const struct tcphdr *tcp_header = (tcphdr *) (packet + sizeof(struct ether_header) + offset);
+        std::addressof(packet) + offset + sizeof(tcphdr) <= this->end_addr) {
+        const struct tcphdr *tcp_header = (tcphdr *) (packet + offset);
         if ((tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES) < IP_HEADER_MIN_LEN) {
             std::cerr << "Invalid TCP header length: " << tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES
                       << "bytes"
@@ -235,63 +238,58 @@ DnsExport::parse_transport_protocol(const unsigned char *packet, unsigned offset
         }
 
         if (!tcp_parse) {
-            const struct ip *ip_header = (struct ip *) (packet + sizeof(struct ether_header));
-            auto packet_copy = (unsigned char *) malloc(
-                    ntohs(ip_header->ip_len) + sizeof(struct ether_header));
-            memcpy(packet_copy, packet, ntohs(ip_header->ip_len) + sizeof(struct ether_header));
+            auto packet_copy = (unsigned char *) malloc(this->ip_total_len);
+            memcpy(packet_copy, packet, this->ip_total_len);
 
             std::pair<const unsigned char *, const unsigned char **> packet_info = std::make_pair(packet_copy,
                                                                                                   this->end_addr);
             tcp_packets.push_back(packet_info);
-        } else if (&packet + sizeof(struct ether_header) + offset + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES) <=
-                   this->end_addr) {
-            payload = (unsigned char *) (packet + sizeof(struct ether_header) + offset +
-                                         (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES));
+        } else if (&packet + offset + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES) <= this->end_addr) {
+            payload = (unsigned char *) (packet + offset + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES));
         }
-    } else if (protocol == IPPROTO_UDP and
-               std::addressof(packet) + sizeof(struct ether_header) + offset + sizeof(struct udphdr) <=
-               this->end_addr) {
-        payload = (unsigned char *) (packet + sizeof(struct ether_header) + offset + sizeof(struct udphdr));
+    } else if (protocol == IPPROTO_UDP and std::addressof(packet) + offset + sizeof(struct udphdr) <= this->end_addr) {
+        payload = (unsigned char *) (packet + offset + sizeof(struct udphdr));
     }
 
     return payload;
 }
 
-unsigned char *DnsExport::parse_IPv4_packet(const unsigned char *packet, bool tcp_parse) {
+unsigned char *DnsExport::parse_IPv4_packet(const unsigned char *packet, size_t offset, bool tcp_parse) {
     unsigned char *payload = nullptr;
 
-    if (std::addressof(packet) + sizeof(struct ether_header) + sizeof(ip) <= this->end_addr) {
-        const struct ip *ip_header = (struct ip *) (packet + sizeof(struct ether_header));
+    if (std::addressof(packet) + offset + sizeof(ip) <= this->end_addr) {
+        const struct ip *ip_header = (struct ip *) (packet + offset);
         if (ip_header->ip_hl << FOUR_OCTET_UNIT_TO_BYTES < IP_HEADER_MIN_LEN ||
             ip_header->ip_hl << FOUR_OCTET_UNIT_TO_BYTES > IP_HEADER_MAX_LEN) {
-            std::cerr << "Invalid IP header length: " << ip_header->ip_hl << FOUR_OCTET_UNIT_TO_BYTES << "bytes"
+            std::cerr << "Invalid IPv4 header length: " << ip_header->ip_hl << FOUR_OCTET_UNIT_TO_BYTES << " bytes"
                       << endl;
         }
-        payload = this->parse_transport_protocol(packet, ip_header->ip_hl << FOUR_OCTET_UNIT_TO_BYTES,
+        this->ip_total_len = ntohs(ip_header->ip_len) + offset;
+        payload = this->parse_transport_protocol(packet, offset + (ip_header->ip_hl << FOUR_OCTET_UNIT_TO_BYTES),
                                                  ip_header->ip_p, tcp_parse);
     }
-
     return payload;
 }
 
-unsigned char *DnsExport::parse_IPv6_packet(const unsigned char *packet, bool tcp_parse) {
+unsigned char *DnsExport::parse_IPv6_packet(const unsigned char *packet, size_t offset, bool tcp_parse) {
     unsigned char *payload = nullptr;
 
-    if (std::addressof(packet) + sizeof(struct ether_header) + IPv6_HEADER_LEN <= this->end_addr) {
-        const struct ip6_hdr *ipv6_header = (struct ip6_hdr *) (packet + sizeof(struct ether_header));
+    if (std::addressof(packet) + offset + IPv6_HEADER_LEN <= this->end_addr) {
+        const struct ip6_hdr *ipv6_header = (struct ip6_hdr *) (packet + offset);
 
         uint8_t next_header = ipv6_header->ip6_nxt;
-        unsigned offset = IPv6_HEADER_LEN;
+        unsigned ipv6_offset = IPv6_HEADER_LEN;
 
         while (next_header != IPPROTO_TCP && next_header != IPPROTO_UDP) {
-            this->proccess_next_header(packet + sizeof(struct ether_header), &next_header, &offset);
-            if (!offset) {
+            this->proccess_next_header(packet + offset, &next_header, &ipv6_offset);
+            if (!ipv6_offset) {
                 break;
             }
         }
 
+        this->ip_total_len = ntohs(ipv6_header->ip6_plen) + offset;
         if (next_header == IPPROTO_TCP || next_header == IPPROTO_UDP) {
-            payload = this->parse_transport_protocol(packet, offset, next_header, tcp_parse);
+            payload = this->parse_transport_protocol(packet, offset + ipv6_offset, next_header, tcp_parse);
         }
     }
 
@@ -301,13 +299,14 @@ unsigned char *DnsExport::parse_IPv6_packet(const unsigned char *packet, bool tc
 unsigned char *DnsExport::my_pcap_handler(const unsigned char *packet, bool tcp_parse) {
     unsigned char *payload = nullptr;
 
-    if (std::addressof(packet) + sizeof(struct ether_header) <= this->end_addr) {
+    if (this->link_type == LINKTYPE_ETHERNET and
+        std::addressof(packet) + sizeof(struct ether_header) <= this->end_addr) {
         const struct ether_header *ethernet_header = (struct ether_header *) packet;
 
         if (ntohs(ethernet_header->ether_type) == ETHERTYPE_IP) {
-            payload = this->parse_IPv4_packet(packet, tcp_parse);
+            payload = this->parse_IPv4_packet(packet, sizeof(struct ether_header), tcp_parse);
         } else if (ntohs(ethernet_header->ether_type) == ETHERTYPE_IPV6) {
-            payload = this->parse_IPv6_packet(packet, tcp_parse);
+            payload = this->parse_IPv6_packet(packet, sizeof(struct ether_header), tcp_parse);
         }
     }
     return payload;
@@ -711,8 +710,10 @@ void DnsExport::parse_payload(unsigned char *payload, bool tcp) {
                         auto iter = this->stats.find(result);
                         if (iter != this->stats.end()) {
                             this->stats.find(result)->second++;
+                            stats1.find(result)->second++;
                         } else {
                             this->stats.insert(std::make_pair<std::string &, int>(result, 1));
+                            stats1.insert(std::make_pair<std::string &, int>(result, 1));
                         }
 
                         payload += ntohs(resource_format->RDLENGTH);
@@ -728,7 +729,7 @@ void DnsExport::parse_payload(unsigned char *payload, bool tcp) {
 
 void DnsExport::proccess_tcp_packets() {
 
-    TCPReassembler tcp_reassembler;
+    TCPReassembler tcp_reassembler(link_type);
     this->tcp_packets = tcp_reassembler.reassembling_packets(this->tcp_packets);
     for (std::pair<const unsigned char *, const unsigned char **> &tcp_packet : this->tcp_packets) {
         this->end_addr = tcp_packet.second;
@@ -740,9 +741,22 @@ void DnsExport::proccess_tcp_packets() {
     this->tcp_packets.clear();
 }
 
+void alarm_handler(int signum) {
+    time_t start, end;
+    time(&start);
+    SyslogSender syslog_sender;
+    //std::cout << stats1.size() << std::endl;
+    syslog_sender.sending_stats(syslog_server_addr, stats1);
+    alarm(time_in_sec - difftime(time(&end), start));
+}
+
+
 void DnsExport::run(int argc, char **argv) {
     ArgumentParser argument_parser;
     argument_parser.parse_arguments(argc, argv);
+    time_in_sec = argument_parser.time_in_seconds;
+    syslog_server_addr = argument_parser.syslog_server_addr;
+
     //argument_parser.print_arguments();
 
     for (const std::string &file_name : argument_parser.pcap_files) {
@@ -751,12 +765,11 @@ void DnsExport::run(int argc, char **argv) {
         for (std::pair<std::string, int> stats_item: this->stats) {
             std::cout << stats_item.first << " " << stats_item.second << endl;
         }
-        //SyslogSender syslog_sender;
-        //syslog_sender.sending_stats(argument_parser.syslog_server_addr, this->stats);
     }
 
     if (!argument_parser.interface_name.empty()) {
-        this->sniffing_interface(argument_parser.interface_name, argument_parser.time_in_seconds,
-                                 argument_parser.syslog_server_addr);
+        signal(SIGALRM, alarm_handler);
+        alarm(argument_parser.time_in_seconds);
+        this->sniffing_interface(argument_parser.interface_name, argument_parser.syslog_server_addr);
     }
 }

@@ -1,6 +1,11 @@
 #include <cstring>
 #include <iostream>
 #include "ArgumentsParser.h"
+#include <linux/if_ether.h>
+#include <ifaddrs.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <zconf.h>
 
 
 /**
@@ -133,6 +138,26 @@ struct AddressWrapper ArgumentParser::proccess_syslog_address(const std::string 
     return address_wrapper;
 }
 
+bool ArgumentParser::is_interface_online()
+{
+    struct ifreq ifr;
+    int sock = socket(PF_INET6, SOCK_DGRAM, IPPROTO_IP);
+    memset(&ifr, 0, sizeof(ifr));
+    strcpy(ifr.ifr_name, this->interface_name.c_str());
+    if (ioctl(sock, SIOCGIFFLAGS, &ifr) < 0) {
+        perror("SIOCGIFFLAGS");
+    }
+    close(sock);
+
+    std::cout << std::hex << ifr.ifr_ifru.ifru_ivalue << std::endl;
+    if (!!(ifr.ifr_flags & IFF_RUNNING)) {
+        //this->get_interface_addr(interface);
+        return true;
+    } else {
+        return false;
+    }
+}
+
 
 void ArgumentParser::parse_arguments(int argc, char **argv) {
     const char *const short_opts = "hr:i:s:t:";
@@ -158,6 +183,7 @@ void ArgumentParser::parse_arguments(int argc, char **argv) {
             }
             case 'i': {
                 this->interface_name = std::string(optarg); // TODO: any interface
+                this->is_interface_online();
                 break;
             }
             case 's': {
@@ -167,7 +193,7 @@ void ArgumentParser::parse_arguments(int argc, char **argv) {
                 break;
             }
             case 't': {
-                this->time_in_seconds = std::stod(optarg);
+                this->time_in_seconds = std::stoi(optarg);
                 break;
             }
             default: {
