@@ -71,7 +71,6 @@ void DnsExport::sniffing_interface(std::string device_name, std::vector<AddressW
         fprintf(stderr, "Couldn't open device %s: %s\n", device_name.c_str(), errbuf);
     }
 
-
     // compile the filter
     if (pcap_compile(handle, &fp, filter_exp, 0, PCAP_NETMASK_UNKNOWN) == -1) {
         std::cerr << "pcap_compile() failed" << endl;
@@ -308,6 +307,15 @@ unsigned char *DnsExport::my_pcap_handler(const unsigned char *packet, bool tcp_
         } else if (ntohs(ethernet_header->ether_type) == ETHERTYPE_IPV6) {
             payload = this->parse_IPv6_packet(packet, sizeof(struct ether_header), tcp_parse);
         }
+    } else if (this->link_type == LINKTYPE_LINUX_SLL and
+        std::addressof(packet) + sizeof(struct linux_sll) <= this->end_addr) {
+        const struct linux_sll *linux_sll_header = (struct linux_sll *) packet;
+
+        if (ntohs(linux_sll_header->protocol_type) == ETHERTYPE_IP) {
+            payload = this->parse_IPv4_packet(packet, sizeof(struct linux_sll), tcp_parse);
+        } else if (ntohs(linux_sll_header->protocol_type) == ETHERTYPE_IPV6) {
+            payload = this->parse_IPv6_packet(packet, sizeof(struct linux_sll), tcp_parse);
+        }
     }
     return payload;
 }
@@ -317,7 +325,6 @@ char *DnsExport::transform_utc_time(const uint32_t utc_time) {
     struct tm *timeinfo = gmtime(&raw_time);
 
     auto *outstr = (char *) malloc(200);
-    //const char* fmt = "%b %d, %G %X %Z";
     const char *fmt = "%Y%m%d%H%M%S";
     if (strftime(outstr, 200, fmt, timeinfo) == 0) {
         fprintf(stderr, "strftime returned 0");

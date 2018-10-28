@@ -33,8 +33,6 @@ private:
     void get_IPv6_elements(std::vector<struct sockaddr_in6> vector_IPv6);
 
     struct AddressWrapper proccess_syslog_address(const std::string &addr);
-
-    bool is_interface_online();
 };
 
 

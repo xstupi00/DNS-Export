@@ -19,9 +19,9 @@
 #define DNS_ANS_TYPE_SPF        99
 
 
-#define NEXTHDR_HOP            0    /* Hop-by-hop option header. */
+#define NEXTHDR_HOP         0    /* Hop-by-hop option header. */
 #define NEXTHDR_IPV6        41    /* IPv6 in IPv6 */
-#define NEXTHDR_ROUTING        43    /* Routing header. */
+#define NEXTHDR_ROUTING     43    /* Routing header. */
 #define NEXTHDR_FRAGMENT    44    /* Fragmentation/reassembly header. */
 #define NEXTHDR_AUTH        51    /* Authentication header. */
 #define NEXTHDR_DEST        60    /* Destination options header. */

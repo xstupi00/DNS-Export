@@ -25,8 +25,7 @@ unsigned char *TCPReassembler::parse_transport_protocol(const unsigned char *pac
         const struct tcphdr *tcp_header = (struct tcphdr *) (packet + offset);
 
         if (!tcp_parse) {
-            if (std::addressof(packet) + offset + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES) <=
-                this->end_addr) {
+            if (std::addressof(packet) + offset + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES) <= this->end_addr) {
                 this->tcp_sequence_number = ntohl(tcp_header->th_seq);
                 this->tcp_segment_length = this->ip_total_len - offset - (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES);
                 payload = (unsigned char *) (packet + offset + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES));
