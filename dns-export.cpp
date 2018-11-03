@@ -1,18 +1,23 @@
-#include <zconf.h>
 #include "DnsExport.h"
-
-// https://www.tutorialspoint.com/cplusplus/cpp_signal_handling.htm
-
-using namespace std;
 
 DnsExport dns_export;
 
-void signal_handler(int signum) {
-    std::cout << "Interrupt signal (" << signum << ") received" << endl;
+void signal_handler(int _) {
+    UNUSED(_);
+    pid_t pid = fork();
 
-    dns_export.proccess_tcp_packets();
-    for (std::pair<std::string, int> stats_item: dns_export.stats) {
-        std::cout << stats_item.first << " " << stats_item.second << endl;
+    if (pid == 0) {
+        dns_export.proccess_tcp_packets();
+        for (std::pair<std::string, int> stats_item: dns_export.stats) {
+            std::cout << stats_item.first << " " << stats_item.second << std::endl;
+        }
+        kill(getpid(), SIGTERM);
+        return;
+    } else if (pid > 0) {
+        return;
+    } else {
+        std::cerr << "System Error: fork() failed" << std::endl;
+        exit(1);
     }
 }
 

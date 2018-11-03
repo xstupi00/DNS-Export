@@ -26,22 +26,23 @@ unsigned char *TCPReassembler::parse_transport_protocol(const unsigned char *pac
         if (!tcp_parse) {
             if (std::addressof(packet) + offset + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES) <= this->end_addr) {
                 this->tcp_sequence_number = ntohl(tcp_header->th_seq);
-                this->tcp_segment_length = this->ip_total_len - offset - (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES);
+                this->tcp_segment_length =
+                        this->ip_total_len - offset - (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES);
                 payload = (unsigned char *) (packet + offset + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES));
                 auto length = (unsigned short *) payload;
                 payload += sizeof(unsigned short);
                 this->dns_length = ntohs(*length);
                 this->last_packet_length = this->ip_total_len;
-                this->packet_hdr_len = offset  + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES);
+                this->packet_hdr_len = offset + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES);
             }
         } else {
-            if (ntohl(tcp_header->th_seq) == this->tcp_sequence_number + tcp_segment_length) {
+            if (ntohl(tcp_header->th_seq) % INT_RANGE == (this->tcp_sequence_number + tcp_segment_length) % INT_RANGE) {
                 if (std::addressof(packet) + offset +
                     (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES) <= this->end_addr) {
                     this->tcp_sequence_number = ntohl(tcp_header->th_seq);
-                    this->tcp_segment_length = this->ip_total_len - offset - (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES);
-                    payload = (unsigned char *) (packet + offset +
-                                                 (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES));
+                    this->tcp_segment_length =
+                            this->ip_total_len - offset - (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES);
+                    payload = (unsigned char *) (packet + offset + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES));
                 }
             }
         }
@@ -59,7 +60,7 @@ TCPReassembler::reassembling_packets(
 
     for (std::pair<const unsigned char *, const unsigned char **> &tcp_packet : tcp_packets) {
         this->end_addr = tcp_packet.second;
-        unsigned char *payload = this->my_pcap_handler(tcp_packet.first, false);
+        unsigned char *payload = this->my_pcap_handler(tcp_packet.first);
 
         if (payload) {
             if (std::addressof(tcp_packet.first) + this->ip_total_len <= this->end_addr) {

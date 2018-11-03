@@ -12,15 +12,52 @@
 #include <cmath>
 #include <sstream>
 #include <iomanip>
-#include <zconf.h>
+#include <unistd.h>
 
 #ifndef __FAVOR_BSD
 #define __FAVOR_BSD
 #endif
 #ifndef NETINET_TCP_H
+
 #include <netinet/tcp.h>
+
 #define NETINET_TCP_H
 #endif
+
+#define DNS_ANS_TYPE_A          1
+#define DNS_ANS_TYPE_NS         2
+#define DNS_ANS_TYPE_CNAME      5
+#define DNS_ANS_TYPE_SOA        6
+#define DNS_ANS_TYPE_PTR        12
+#define DNS_ANS_TYPE_MX         15
+#define DNS_ANS_TYPE_TXT        16
+#define DNS_ANS_TYPE_AAAA       28
+#define DNS_ANS_TYPE_SRV        33
+#define DNS_ANS_TYPE_DS         43
+#define DNS_ANS_TYPE_RRSIG      46
+#define DNS_ANS_TYPE_NSEC       47
+#define DNS_ANS_TYPE_DNSKEY     48
+#define DNS_ANS_TYPE_NSEC3      50
+#define DNS_ANS_TYPE_NSEC3PARAM 51
+#define DNS_ANS_TYPE_SPF        99
+
+#define NEXTHDR_HOP         0    /* Hop-by-hop option header. */
+#define NEXTHDR_IPV6        41    /* IPv6 in IPv6 */
+#define NEXTHDR_ROUTING     43    /* Routing header. */
+#define NEXTHDR_FRAGMENT    44    /* Fragmentation/reassembly header. */
+#define NEXTHDR_AUTH        51    /* Authentication header. */
+#define NEXTHDR_DEST        60    /* Destination options header. */
+#define NEXTHDR_MOBILITY    135    /* Mobility header. */
+
+#define FOUR_OCTET_UNIT_TO_BYTES    2
+#define EIGHT_OCTET_UNIT_TO_BYTES   3
+#define IP_HEADER_MIN_LEN           20
+#define IPv6_HEADER_LEN             40
+#define IP_HEADER_MAX_LEN           60
+
+#define LINKTYPE_LINUX_SLL          113
+#define LINKTYPE_ETHERNET           1
+#define UNUSED(x) (void)(x)
 
 
 class DnsExport {
@@ -38,9 +75,13 @@ public:
 
     void run(int argc, char **argv);
 
-    unsigned char *my_pcap_handler(const unsigned char *packet, bool tcp_parse);
+    void proccess_tcp_packets();
 
-    unsigned char *read_name(unsigned char *reader, unsigned char *buffer, unsigned *count);
+    unsigned char *my_pcap_handler(const unsigned char *packet, bool tcp_parse = false);
+
+private:
+
+    std::string read_name(unsigned char *reader, unsigned char *buffer, unsigned *count);
 
     void parse_payload(unsigned char *payload, bool tcp);
 
@@ -50,22 +91,18 @@ public:
 
     void proccess_next_header(const unsigned char *ipv6_header, uint8_t *next_header, unsigned *offset);
 
-    unsigned char *parse_IPv4_packet(const unsigned char *packet, size_t offset, bool tcp_parse);
+    unsigned char *parse_IPv4_packet(const unsigned char *packet, size_t offset, bool tcp_parse = false);
 
-    unsigned char *parse_IPv6_packet(const unsigned char *packet, size_t offset, bool tcp_parse);
+    unsigned char *parse_IPv6_packet(const unsigned char *packet, size_t offset, bool tcp_parse = false);
 
     virtual unsigned char *
     parse_transport_protocol(const unsigned char *packet, size_t offset, u_int8_t protocol, bool tcp_parse);
 
-    char *transform_utc_time(const uint32_t utc_time);
-
-    void proccess_tcp_packets();
+    char *transform_utc_time(uint32_t utc_time);
 
     std::string proccess_bits_array(unsigned char *record_payload);
 
-    void sniffing_interface(std::string device_name, std::vector<AddressWrapper> syslog_addr);
-
-    void parse_pcap_file(const char *pcap_file_name);
+    void parse_pcap_file(const char *name, bool mode = false);
 };
 
 #endif //DNSEXPORT_H

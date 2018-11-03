@@ -18,125 +18,88 @@ DnsExport::DnsExport() = default;
 */
 DnsExport::~DnsExport() = default;
 
+/*
+ * TODO: auto check
+ * TODO: relocate constant and structures, that are using in concretly modules
+ * TODO: private methods
+ * TODO: error states, return codes at all
+ * TODO: ternary operator using
+ */
 
-void DnsExport::parse_pcap_file(const char *pcap_file_name) {
+
+void DnsExport::parse_pcap_file(const char *name, bool mode) {
     char errbuff[PCAP_ERRBUF_SIZE];    /* Error string */
     const unsigned char *packet;
-    struct pcap_pkthdr header;
-    struct bpf_program fp;        /* The compiled filter expression */
-    char filter_exp[] = "src port 53";    /* The filter expression */
-
-    /* Open the session in promiscuous mode */
-    pcap_t *handle = pcap_open_offline(pcap_file_name, errbuff);
-    if (handle == nullptr) {
-        std::cerr << "Couldn't open file:" << pcap_geterr(handle) << endl;
-    }
-
-    // compile the filter
-    if (pcap_compile(handle, &fp, filter_exp, 0, 0) == -1) {
-        std::cerr << "pcap_compile(): " << pcap_geterr(handle) << endl;
-    }
-
-    // set the filter to the packet capture handle
-    if (pcap_setfilter(handle, &fp) == -1) {
-        std::cerr << "pcap_setfilter(): " << pcap_geterr(handle) << endl;
-    }
-
-    this->link_type = pcap_datalink(handle);
-    while ((packet = pcap_next(handle, &header)) != nullptr) {
-        if (header.len > header.caplen) continue;
-
-        this->end_addr = std::addressof(packet) + header.caplen;
-        u_char *payload = this->my_pcap_handler(packet, false);
-        if (payload) {
-            this->parse_payload(payload, false);
-        }
-    }
-}
-
-void DnsExport::sniffing_interface(std::string device_name, std::vector<AddressWrapper> syslog_addr) {
-    char errbuf[PCAP_ERRBUF_SIZE];    /* Error string */
-    const unsigned char *packet;
     struct pcap_pkthdr header = {};
-    struct bpf_program fp = {};        /* The compiled filter expression */
+    struct bpf_program fp {};        /* The compiled filter expression */
     char filter_exp[] = "src port 53";    /* The filter expression */
+    pcap_t *handle;
 
     /* Open the session in promiscuous mode */
-    std::cout << "Open device: " << device_name << endl;
-    pcap_t *handle = pcap_open_live(device_name.c_str(), BUFSIZ, 1, 1000, errbuf);
+    handle = mode ? pcap_open_live(name, BUFSIZ, 1, 1000, errbuff) : pcap_open_offline(name, errbuff);
     if (handle == nullptr) {
-        std::cerr << "Couldn't open device " << device_name << " :" << pcap_geterr(handle) << endl;
+        std::perror(mode ? "pcap_open_live() failed:" : "pcap_open_offline() failed:");
     }
 
     // compile the filter
     if (pcap_compile(handle, &fp, filter_exp, 0, PCAP_NETMASK_UNKNOWN) == -1) {
-        std::cerr << "pcap_compile():" << pcap_geterr(handle) << endl;
+        std::perror("pcap_compile() failed:");
     }
 
     // set the filter to the packet capture handle
     if (pcap_setfilter(handle, &fp) == -1) {
-        std::cerr << "pcap_setfilter()" << pcap_geterr(handle) << endl;
+        std::perror("pcap_setfilter() failed:");
     }
 
     this->link_type = pcap_datalink(handle);
-    for (;;) {
-        while (((packet = pcap_next(handle, &header)) != nullptr)) {
+    for(;;) {
+        while ((packet = pcap_next(handle, &header)) != nullptr) {
             if (header.len > header.caplen) continue;
 
             this->end_addr = std::addressof(packet) + header.caplen;
-            u_char *payload = this->my_pcap_handler(packet, false);
+            u_char *payload = this->my_pcap_handler(packet);
             if (payload) {
                 this->parse_payload(payload, false);
             }
         }
+        if (!mode) break;
     }
 }
 
 
 ///< backward transformation domain name from the DNS form
-unsigned char *DnsExport::read_name(unsigned char *reader, unsigned char *buffer, unsigned *count) {
+std::string DnsExport::read_name(unsigned char *reader, unsigned char *buffer, unsigned *count) {
 
-    auto name = (unsigned char *) malloc(256); // TODO: rework to string
-    name[0] = '\0';
-
-    unsigned int p = 0, jumped = 0, offset;
-    int i, j;
+    std::string name;
+    bool jumped = false;
     *count = 1;
 
-    // read the names in 3www6google3com format
-    while (*reader && std::addressof(reader) <= (unsigned char **) this->end_addr) {
+    for (; *reader && std::addressof(reader) <= (unsigned char **) this->end_addr; reader++) {
         if (*reader >= 192) {
             if (std::addressof(reader) + sizeof(unsigned char) <= (unsigned char **) this->end_addr) {
-                offset = (*reader) * 256 + *(reader + 1) - 49152; //49152 = 11000000 00000000 ;)
-                reader = buffer + offset - 1;
-                jumped = 1; // we have jumped to another location so counting wont go up!
+                reader = buffer + (((*reader)<<8) + *(reader + 1) - 0xc000) - 1;
+                jumped = true;
             } else {
-                break;
+                break; // TODO: warm up
             }
         } else {
-            name[p++] = *reader;
+            name.push_back(*reader);
         }
-        reader++;
 
-        if (!jumped) (*count)++; // if we havent jumped to another location then we can count up
+        if (!jumped) (*count)++;
     }
 
-    name[p] = '\0'; // string complete
-    if (jumped == 1) (*count)++; // number of steps we actually moved forward in the packet
+    if (jumped) (*count)++;
 
-    // now convert 3www6google3com0 to www.google.com
-    for (i = 0; i < (int) strlen((const char *) name); i++) {
-        p = name[i];
-        for (j = 0; j < (int) p; j++) {
-            name[i] = name[i + 1];
-            i = i + 1;
-        }
-        name[i] = '.';
+    for (unsigned i = 0; i < name.length(); i++) {
+        auto label_length = (unsigned) name.at(i);
+        name.insert(name.at(i)+i+1, ".");
+        name.erase(i, 1);
+        i += label_length;
     }
-    name[i - 1] = '\0'; // remove the last dot
+    name.erase(name.length()-1);
 
-    if (*reader) return nullptr;
-    else return name;
+    return name;
 }
 
 
@@ -214,7 +177,7 @@ void DnsExport::proccess_next_header(const unsigned char *ipv6_header, uint8_t *
         }
         default: {
             *offset = 0;
-            std::cerr << "Unknown type of next header: " << next_header << " (packet will be ignored)" << endl;
+            std::cerr << "Unknown type of next header: " << next_header << " (packet will be ignored)" << std::endl;
         }
     }
 }
@@ -229,7 +192,7 @@ DnsExport::parse_transport_protocol(const unsigned char *packet, size_t offset, 
         if ((tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES) < IP_HEADER_MIN_LEN) {
             std::cerr << "Invalid TCP header length: " << tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES
                       << "bytes"
-                      << endl;
+                      << std::endl;
         }
 
         if (!tcp_parse) {
@@ -257,7 +220,7 @@ unsigned char *DnsExport::parse_IPv4_packet(const unsigned char *packet, size_t 
         if (ip_header->ip_hl << FOUR_OCTET_UNIT_TO_BYTES < IP_HEADER_MIN_LEN ||
             ip_header->ip_hl << FOUR_OCTET_UNIT_TO_BYTES > IP_HEADER_MAX_LEN) {
             std::cerr << "Invalid IPv4 header length: " << ip_header->ip_hl << FOUR_OCTET_UNIT_TO_BYTES << " bytes"
-                      << endl;
+                      << std::endl;
         }
         this->ip_total_len = ntohs(ip_header->ip_len) + offset;
         payload = this->parse_transport_protocol(packet, offset + (ip_header->ip_hl << FOUR_OCTET_UNIT_TO_BYTES),
@@ -323,8 +286,7 @@ char *DnsExport::transform_utc_time(const uint32_t utc_time) {
     auto *outstr = (char *) malloc(200);
     const char *fmt = "%Y%m%d%H%M%S";
     if (strftime(outstr, 200, fmt, timeinfo) == 0) {
-        fprintf(stderr, "strftime returned 0");
-        exit(EXIT_FAILURE);
+        std::cerr << "srtftime() failed";
     }
     return outstr;
 }
@@ -375,7 +337,7 @@ std::string DnsExport::decode_dns_record(
                 memcpy(&addr, record_payload, sizeof(in_addr));
                 char addr_IPv4[INET_ADDRSTRLEN];
                 if (!inet_ntop(AF_INET, &addr, addr_IPv4, INET_ADDRSTRLEN)) {
-                    std::cerr << "inet_ntop() failed: " << std::strerror(errno) << endl;
+                    std::perror("inet_ntop() failed:");
                 } else {
                     result << "A " << addr_IPv4;
                 }
@@ -390,7 +352,7 @@ std::string DnsExport::decode_dns_record(
                 memcpy(&addr, record_payload, sizeof(in6_addr));
                 char addr_IPv6[INET6_ADDRSTRLEN];
                 if (!inet_ntop(AF_INET6, &addr, addr_IPv6, INET6_ADDRSTRLEN)) {
-                    std::cerr << "inet_ntop() failed: " << std::strerror(errno) << endl;
+                    std::perror("inet_ntop failed():");
                 } else {
                     result << "AAAA " << addr_IPv6;
                 }
@@ -402,9 +364,9 @@ std::string DnsExport::decode_dns_record(
             unsigned index = 0;
             if (std::addressof(record_payload) + sizeof(struct ns_preference) <= (unsigned char **) this->end_addr) {
                 auto preference = (struct ns_preference *) record_payload;
-                auto mx_name = (char *) this->read_name(record_payload + sizeof(struct ns_preference), buffer, &index);
+                std::string mx_name = this->read_name(record_payload + sizeof(struct ns_preference), buffer, &index);
 
-                if (index + sizeof(struct ns_preference) == data_length and mx_name) {
+                if (index + sizeof(struct ns_preference) == data_length and !mx_name.empty()) {
                     result << "MX " << ntohs(preference->preference) << " " << mx_name;
                 }
             }
@@ -413,13 +375,13 @@ std::string DnsExport::decode_dns_record(
         }
         case DNS_ANS_TYPE_SOA: {
             unsigned offset = 0;
-            unsigned char *primary_name_server = this->read_name(record_payload, buffer, &offset);
-            if (!primary_name_server) break;
+            std::string primary_name_server = this->read_name(record_payload, buffer, &offset);
+            if (primary_name_server.empty()) break;
             record_payload += offset;
 
             unsigned offset1 = 0;
-            u_char *responsible_auth_mail = this->read_name(record_payload, buffer, &offset1);
-            if (!responsible_auth_mail) break;
+            std::string responsible_auth_mail = this->read_name(record_payload, buffer, &offset1);
+            if (responsible_auth_mail.empty()) break;
             record_payload += offset1;
 
             if (std::addressof(record_payload) + sizeof(struct soa_record) <= (unsigned char **) this->end_addr and
@@ -440,8 +402,8 @@ std::string DnsExport::decode_dns_record(
                 record_payload += sizeof(struct rrsig_record);
 
                 unsigned offset = 0;
-                u_char *signers_name = this->read_name(record_payload, buffer, &offset);
-                if (!signers_name) break;
+                std::string signers_name = this->read_name(record_payload, buffer, &offset);
+                if (signers_name.empty()) break;
                 record_payload += offset;
 
                 unsigned signature_length = data_length - sizeof(struct rrsig_record) - offset;
@@ -459,7 +421,7 @@ std::string DnsExport::decode_dns_record(
 
                     for (unsigned i = 0; i < signature_length; i++) {
                         //for (unsigned i = 0; i < 20; i++) {
-                        result << std::hex << std::setfill('0') << setw(2) << (unsigned short) ((signature[i] & 0xFF));
+                        result << std::hex << std::setfill('0') << std::setw(2) << (unsigned short) ((signature[i] & 0xFF));
                     }
                     //result << std::dec << "... ";
                 }
@@ -485,7 +447,7 @@ std::string DnsExport::decode_dns_record(
 
                     for (unsigned i = 0; i < digest_length; i++) {
                         //for (unsigned i = 0; i < 20; i++) {
-                        result << std::hex << std::setfill('0') << setw(2) << (unsigned short) ((digest[i] & 0xFF));
+                        result << std::hex << std::setfill('0') << std::setw(2) << (unsigned short) ((digest[i] & 0xFF));
                     }
                     //result << std::dec << "... ";
                 }
@@ -496,8 +458,8 @@ std::string DnsExport::decode_dns_record(
         }
         case DNS_ANS_TYPE_NSEC: {
             unsigned offset = 0;
-            u_char *domain_name = this->read_name(record_payload, buffer, &offset);
-            if (domain_name) {
+            std::string domain_name = this->read_name(record_payload, buffer, &offset);
+            if (!domain_name.empty()) {
                 result << "NSEC " << domain_name;
                 record_payload += offset;
                 std::string bits_arr = this->proccess_bits_array(record_payload);
@@ -523,7 +485,7 @@ std::string DnsExport::decode_dns_record(
 
                     for (unsigned i = 0; i < public_key_length; i++) {
                         //for (unsigned i = 0; i < 20; i++) {
-                        result << std::hex << std::setfill('0') << setw(2) << (unsigned short) ((public_key[i] & 0xFF));
+                        result << std::hex << std::setfill('0') << std::setw(2) << (unsigned short) ((public_key[i] & 0xFF));
                     }
                 }
             }
@@ -548,13 +510,13 @@ std::string DnsExport::decode_dns_record(
 
                     for (unsigned i = 0; i < int(nsec3->salt_length); i++) {
                         //for (unsigned i = 0; i < 20; i++) {
-                        result << std::hex << std::setfill('0') << setw(2) << (unsigned short) ((salt[i] & 0xFF));
+                        result << std::hex << std::setfill('0') << std::setw(2) << (unsigned short) ((salt[i] & 0xFF));
                     }
 
                     uint8_t hash_length;
                     memcpy(&hash_length, record_payload, sizeof(uint8_t));
                     record_payload += sizeof(uint8_t);
-                    result << std::dec << "... " << endl << int(hash_length) << " ";
+                    result << std::dec << "... " << std::endl << int(hash_length) << " ";
 
                     if (std::addressof(record_payload) + hash_length + sizeof(struct nsec_record) <=
                         (unsigned char **) this->end_addr) {
@@ -564,7 +526,7 @@ std::string DnsExport::decode_dns_record(
 
                         for (unsigned i = 0; i < int(hash_length); i++) {
                             //for (unsigned i = 0; i < 20; i++) {
-                            result << std::hex << std::setfill('0') << setw(2)
+                            result << std::hex << std::setfill('0') << std::setw(2)
                                    << (unsigned short) ((owner_name[i] & 0xFF));
                         }
                         //result << std::dec << "... " << endl;
@@ -611,7 +573,7 @@ std::string DnsExport::decode_dns_record(
                     memcpy(salt, record_payload, __size_t(nsec3->salt_length));
                     for (unsigned i = 0; i < int(nsec3->salt_length); i++) {
                         //for (unsigned i = 0; i < 20; i++) {
-                        result << std::hex << std::setfill('0') << setw(2) << (unsigned short) ((salt[i] & 0xFF));
+                        result << std::hex << std::setfill('0') << std::setw(2) << (unsigned short) ((salt[i] & 0xFF));
                     }
                 }
                 //result << std::dec << "... ";
@@ -625,8 +587,8 @@ std::string DnsExport::decode_dns_record(
                 auto srv = (struct srv_record *) record_payload;
                 record_payload += sizeof(struct srv_record);
                 unsigned offset = 0;
-                unsigned char *srv_name = this->read_name(record_payload, buffer, &offset);
-                if (srv_name) {
+                std::string srv_name = this->read_name(record_payload, buffer, &offset);
+                if (!srv_name.empty()) {
                     result << "SRV " << ntohs(srv->priority) << " " << ntohs(srv->weight) << " " << ntohs(srv->port)
                            << " " << srv_name;
                 }
@@ -636,23 +598,23 @@ std::string DnsExport::decode_dns_record(
             break;
         }
         case DNS_ANS_TYPE_NS: {
-            unsigned char *name_server = this->read_name(record_payload, buffer, record_length);
-            if (name_server) result << "NS " << name_server;
+            std::string name_server = this->read_name(record_payload, buffer, record_length);
+            if (!name_server.empty()) result << "NS " << name_server;
             break;
         }
         case DNS_ANS_TYPE_CNAME: {
-            unsigned char *cname = this->read_name(record_payload, buffer, record_length);
-            if (cname) result << "CNAME " << cname;
+            std::string cname = this->read_name(record_payload, buffer, record_length);
+            if (!cname.empty()) result << "CNAME " << cname;
             break;
         }
         case DNS_ANS_TYPE_PTR: {
-            unsigned char *domain_name = this->read_name(record_payload, buffer, record_length);
-            if (domain_name) result << "PTR " << domain_name;
+            std::string domain_name = this->read_name(record_payload, buffer, record_length);
+            if (!domain_name.empty()) result << "PTR " << domain_name;
             break;
         }
         case DNS_ANS_TYPE_TXT: {
-            unsigned char *txt_content = this->read_name(record_payload, buffer, record_length);
-            if (txt_content) result << "TXT " << txt_content;
+            std::string txt_content = this->read_name(record_payload, buffer, record_length);
+            if (!txt_content.empty()) result << "TXT " << txt_content;
             break;
         }
         default: {
@@ -673,16 +635,16 @@ void DnsExport::parse_payload(unsigned char *payload, bool tcp) {
         const struct DNS_HEADER *dns_header = (struct DNS_HEADER *) payload;
 
         unsigned char *buffer = payload;
-        unsigned char *qname = nullptr;
+        std::string qname;
         unsigned end = 0;
 
         if (dns_header->QR == 1 and dns_header->RCODE == 0b0000) {// and
             //std::find(this->dns_ids.begin(), this->dns_ids.end(), ntohs(dns_header->ID)) == this->dns_ids.end()) {
             payload += sizeof(struct DNS_HEADER);
             for (unsigned i = 0; i < ntohs(dns_header->QDCOUNT); i++) {
-                auto tmp_ret_var = this->read_name(payload, buffer, &end);
+                std::string tmp_ret_var = this->read_name(payload, buffer, &end);
                 if (std::addressof(payload) + end + sizeof(struct QUESTION_FORMAT) <=
-                    (unsigned char **) this->end_addr and tmp_ret_var) {
+                    (unsigned char **) this->end_addr and !tmp_ret_var.empty()) {
                     payload += end + sizeof(struct QUESTION_FORMAT);
                 } else {
                     return;
@@ -692,7 +654,7 @@ void DnsExport::parse_payload(unsigned char *payload, bool tcp) {
             for (unsigned i = 0; i < ntohs(dns_header->ANCOUNT); i++) {
                 qname = this->read_name(payload, buffer, &end);
                 if (std::addressof(payload) + end + sizeof(struct RESOURCE_FORMAT) <=
-                    (unsigned char **) this->end_addr and qname) {
+                    (unsigned char **) this->end_addr and !qname.empty()) {
                     auto resource_format = (struct RESOURCE_FORMAT *) (payload + end);
                     payload += end + sizeof(struct RESOURCE_FORMAT);
                     if (std::addressof(payload) + ntohs(resource_format->RDLENGTH) <=
@@ -744,13 +706,24 @@ void DnsExport::proccess_tcp_packets() {
     this->tcp_packets.clear();
 }
 
-void alarm_handler(int signum) {
-    time_t start, end;
-    time(&start);
-    SyslogSender syslog_sender;
-    //std::cout << stats1.size() << std::endl;
-    syslog_sender.sending_stats(syslog_server_addr, stats1);
-    alarm(time_in_sec - difftime(time(&end), start));
+void handle_signal(int _) {
+    UNUSED(_);
+
+    pid_t pid = fork();
+
+    if (pid == 0) {
+        SyslogSender syslog_sender;
+        syslog_sender.sending_stats(syslog_server_addr, stats1);
+        kill(getpid(), SIGTERM);
+        return;
+    } else if (pid > 0) {
+        alarm(time_in_sec);
+        return;
+    } else {
+        std::cerr << "System Error: fork() failed" << std::endl;
+        exit(1);
+    }
+
 }
 
 
@@ -760,19 +733,19 @@ void DnsExport::run(int argc, char **argv) {
     time_in_sec = argument_parser.time_in_seconds;
     syslog_server_addr = argument_parser.syslog_server_addr;
 
-    //argument_parser.print_arguments();
-
-    for (const std::string &file_name : argument_parser.pcap_files) {
-        this->parse_pcap_file(file_name.c_str());
-        this->proccess_tcp_packets();
-        for (std::pair<std::string, int> stats_item: this->stats) {
-            std::cout << stats_item.first << " " << stats_item.second << endl;
-        }
-    }
-
-    if (!argument_parser.interface_name.empty()) {
-        signal(SIGALRM, alarm_handler);
+    if (argument_parser.pcap_files.empty()) {
+        signal(SIGALRM, handle_signal);
         alarm(argument_parser.time_in_seconds);
-        this->sniffing_interface(argument_parser.interface_name, argument_parser.syslog_server_addr);
+        this->parse_pcap_file(argument_parser.interface_name.c_str());
+    } else {
+        for (const std::string &file_name : argument_parser.pcap_files) {
+            this->parse_pcap_file(file_name.c_str());
+            this->proccess_tcp_packets();
+            for (std::pair<std::string, int> stats_item: this->stats) {
+                std::cout << stats_item.first << " " << stats_item.second << std::endl;
+            }
+            SyslogSender syslog_sender;
+            syslog_sender.sending_stats(syslog_server_addr, stats1);
+        }
     }
 }

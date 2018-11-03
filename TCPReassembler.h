@@ -21,13 +21,15 @@
 #define __FAVOR_BSD
 #endif
 #ifndef NETINET_TCP_H
+
 #include <netinet/tcp.h>
+
 #define NETINET_TCP_H
 #endif
 
 #include "DnsExport.h"
 
-using namespace std;
+#define INT_RANGE 1UL<<32
 
 class TCPReassembler : public DnsExport {
 public:

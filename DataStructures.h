@@ -1,41 +1,5 @@
 #include <vector>
 
-#define DNS_ANS_TYPE_A          1
-#define DNS_ANS_TYPE_NS         2
-#define DNS_ANS_TYPE_CNAME      5
-#define DNS_ANS_TYPE_SOA        6
-#define DNS_ANS_TYPE_PTR        12
-#define DNS_ANS_TYPE_MX         15
-#define DNS_ANS_TYPE_TXT        16
-#define DNS_ANS_TYPE_AAAA       28
-#define DNS_ANS_TYPE_SRV        33
-#define DNS_ANS_TYPE_DS         43
-#define DNS_ANS_TYPE_RRSIG      46
-#define DNS_ANS_TYPE_NSEC       47
-#define DNS_ANS_TYPE_DNSKEY     48
-#define DNS_ANS_TYPE_NSEC3      50
-#define DNS_ANS_TYPE_NSEC3PARAM 51
-
-#define DNS_ANS_TYPE_SPF        99
-
-
-#define NEXTHDR_HOP         0    /* Hop-by-hop option header. */
-#define NEXTHDR_IPV6        41    /* IPv6 in IPv6 */
-#define NEXTHDR_ROUTING     43    /* Routing header. */
-#define NEXTHDR_FRAGMENT    44    /* Fragmentation/reassembly header. */
-#define NEXTHDR_AUTH        51    /* Authentication header. */
-#define NEXTHDR_DEST        60    /* Destination options header. */
-#define NEXTHDR_MOBILITY    135    /* Mobility header. */
-
-#define FOUR_OCTET_UNIT_TO_BYTES    2
-#define EIGHT_OCTET_UNIT_TO_BYTES   3
-#define IP_HEADER_MIN_LEN           20
-#define IPv6_HEADER_LEN             40
-#define IP_HEADER_MAX_LEN           60
-
-#define LINKTYPE_LINUX_SLL          113
-#define LINKTYPE_ETHERNET           1
-
 std::string decode_rr_type(int rr_type);
 
 std::string decode_algorithm(int algorithm);
