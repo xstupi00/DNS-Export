@@ -74,7 +74,7 @@ public:
     std::unordered_map<std::string, int> stats;
     std::vector<int> dns_ids;
     const unsigned char **end_addr;
-    int link_type;
+    size_t datalink_header_length;
     size_t ip_total_len = 0;
 
     void run(int argc, char **argv);

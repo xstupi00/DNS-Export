@@ -11,13 +11,14 @@ void signal_handler(int _) {
         for (std::pair<std::string, int> stats_item: dns_export.stats) {
             std::cout << stats_item.first << " " << stats_item.second << std::endl;
         }
+        std::cout << std::endl;
         kill(getpid(), SIGTERM);
         return;
     } else if (pid > 0) {
         return;
     } else {
         std::cerr << "System Error: fork() failed" << std::endl;
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 

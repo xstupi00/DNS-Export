@@ -20,16 +20,11 @@ public:
     ~ArgumentParser();
 
     std::vector<std::string> pcap_files;
-    std::vector<struct AddressWrapper> syslog_server_addr;
+    std::vector<std::string> syslog_servers;
     std::string interface_name = "any";
     unsigned time_in_seconds = 60;
 
     void parse_arguments(int argc, char **argv);
-
-private:
-    void proccess_file_argument(const std::string &file_name);
-
-    struct AddressWrapper proccess_syslog_address(const std::string &addr);
 };
 
 #endif //ARGUMENTSPARSER_H

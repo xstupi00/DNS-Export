@@ -4,7 +4,7 @@ std::string decode_rr_type(int rr_type);
 
 std::string decode_algorithm(int algorithm);
 
-size_t get_size_of_datalink(int datalink_id);
+size_t get_length_of_datalink(int datalink_id);
 
 struct AddressWrapper {
     std::vector<struct sockaddr_in> addr_IPv4;

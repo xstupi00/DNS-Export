@@ -1,5 +1,5 @@
-#include <zconf.h>
 #include <strings.h>
+#include <cstring>
 #include "SyslogSender.h"
 #include "DataStructures.h"
 
@@ -67,54 +67,43 @@ size_t SyslogSender::nth_substr(int n, const std::string& s, const std::string& 
     return i;
 }
 
-void SyslogSender::send_msg_to_server(std::vector<struct AddressWrapper> syslog_servers, std::string msg) {
+void SyslogSender::send_msg_to_server(std::vector<std::string> syslog_servers, std::string msg) {
+    struct addrinfo hints;
+    struct addrinfo *result, *rp;
+    int s;
 
-    //std::cout << "SENDING MSG = " << msg.size() << std::endl;
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_flags = 0;
+    hints.ai_protocol = 0;
 
-    for (struct AddressWrapper &syslog_server : syslog_servers) {
-        if (!syslog_server.addr_IPv4.empty()) {
-            for (struct sockaddr_in &addr_IPv4 : syslog_server.addr_IPv4) {
-                if ((this->socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
-                    std::perror("socket() failed");
-                } else {
-                    addr_IPv4.sin_port = htons(514);
-                    if (connect(this->socket_fd, (struct sockaddr *) &addr_IPv4, sizeof(addr_IPv4)) == -1) {
-                        std::perror("connect() failed");
-                    }
-                    msg.insert(this->nth_substr(2, msg, " ")+1, this->get_local_hostname()+" ");
-                    //std::cout << msg << std::endl;
-                    ssize_t s = send(this->socket_fd, msg.c_str(), msg.length(), 0);
-                    if (s < 0) {
-                        std::perror("sendto() failed");
-                    } else {
-                        break;
-                    }
+    s = getaddrinfo(syslog_servers.at(0).c_str(), "syslog", &hints, &result);
+    if (s != 0) {
+        std::cerr << "getaddrinfo: " << gai_strerror(s) << std::endl;
+    } else {
+        for (rp = result; rp != nullptr; rp = rp->ai_next) {
+            if ((this->socket_fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)) < 0) {
+                std::perror("socket() failed");
+            } else {
+                if (connect(this->socket_fd, rp->ai_addr, rp->ai_addrlen) == -1) {
+                    std::perror("connect() failed");
                 }
-            }
-        } else if (!syslog_server.addr_IPv6.empty()) {
-            for (struct sockaddr_in6 &addr_IPv6 : syslog_server.addr_IPv6) {
-                if ((this->socket_fd = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
-                    std::perror("socket() failed");
+                msg.insert(this->nth_substr(2, msg, " ")+1, this->get_local_hostname()+" ");
+                ssize_t s1 = send(this->socket_fd, msg.c_str(), msg.length(), 0);
+                if (s1 < 0) {
+                    std::perror("sendto() failed");
                 } else {
-                    addr_IPv6.sin6_port = htons(514);
-                    if (connect(this->socket_fd, (struct sockaddr *) &addr_IPv6, sizeof(addr_IPv6)) == -1) {
-                        std::perror("connect() failed");
-                    }
-                    msg.insert(this->nth_substr(2, msg, " ")+1, this->get_local_hostname()+" ");
-                    ssize_t s = send(this->socket_fd, msg.c_str(), msg.length(), 0);
-                    if (s < 0) {
-                        std::perror("sendto() failed");
-                    } else {
-                        break;
-                    }
+                    break;
                 }
             }
         }
     }
+    freeaddrinfo(result);
 }
 
-void SyslogSender::sending_stats(std::vector<struct AddressWrapper> syslog_servers,
-                                 std::unordered_map<std::string, int> stats) {
+void SyslogSender::sending_stats(std::vector<std::string> syslog_servers, std::unordered_map<std::string, int> stats) {
+
     std::stringstream msg;
     msg << "<" << LOG_MAKEPRI(LOG_LOCAL0, LOG_INFO) << ">1 " << this->generate_timestamp() << " " << "dns-export" << " "
         << getpid() << " - - ";

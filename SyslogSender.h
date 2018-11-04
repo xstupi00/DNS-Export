@@ -14,6 +14,8 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <sys/types.h>
+#include <unistd.h>
 
 class SyslogSender {
 public:
@@ -21,13 +23,13 @@ public:
 
     ~SyslogSender();
 
-    void sending_stats(std::vector<struct AddressWrapper> syslog_servers, std::unordered_map<std::string, int> stats);
+    void sending_stats(std::vector<std::string> syslog_servers, std::unordered_map<std::string, int> stats);
 
     std::string generate_timestamp();
 
     std::string get_local_hostname();
 
-    void send_msg_to_server(std::vector<struct AddressWrapper> syslog_servers, std::string msg);
+    void send_msg_to_server(std::vector<std::string> syslog_servers, std::string msg);
 
     size_t nth_substr(int n, const std::string& s, const std::string& p);
 

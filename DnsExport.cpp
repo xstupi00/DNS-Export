@@ -3,7 +3,7 @@
 #include "SyslogSender.h"
 
 unsigned int time_in_sec = 0;
-std::vector<struct AddressWrapper> syslog_server_addr;
+std::vector<std::string> syslog_servers;
 std::unordered_map<std::string, int> stats1;
 
 /**
@@ -27,48 +27,47 @@ DnsExport::~DnsExport() = default;
 
 
 void DnsExport::execute_sniffing(const char *name, bool mode) {
-    char errbuff[PCAP_ERRBUF_SIZE];    /* Error string */
+    char err_buff[PCAP_ERRBUF_SIZE];    /* Error string */
     const unsigned char *packet;
-    struct pcap_pkthdr header = {};
-    struct bpf_program fp{};        /* The compiled filter expression */
+    struct pcap_pkthdr header;
+    struct bpf_program fp;        /* The compiled filter expression */
     char filter_exp[] = "src port 53";    /* The filter expression */
     pcap_t *handle;
 
     /* Open the session in promiscuous mode */
-    handle = mode ? pcap_open_live(name, BUFSIZ, 1, 1000, errbuff) : pcap_open_offline(name, errbuff);
-    if (handle == nullptr) {
-        std::perror(mode ? "pcap_open_live() failed:" : "pcap_open_offline() failed:");
-    }
+    handle = mode ? pcap_open_live(name, BUFSIZ, 1, 1000, err_buff) : pcap_open_offline(name, err_buff);
+    if (handle != nullptr) {
+        // compile the filter
+        if (pcap_compile(handle, &fp, filter_exp, 0, PCAP_NETMASK_UNKNOWN) != -1) {
+            // set the filter to the packet capture handle
+            if (pcap_setfilter(handle, &fp) != -1) {
+                this->datalink_header_length = get_length_of_datalink(pcap_datalink(handle));
+                for (;;) {
+                    while ((packet = pcap_next(handle, &header)) != nullptr) {
+                        if (header.len > header.caplen) continue;
 
-    // compile the filter
-    if (pcap_compile(handle, &fp, filter_exp, 0, PCAP_NETMASK_UNKNOWN) == -1) {
-        std::perror("pcap_compile() failed:");
-    }
-
-    // set the filter to the packet capture handle
-    if (pcap_setfilter(handle, &fp) == -1) {
-        std::perror("pcap_setfilter() failed:");
-    }
-
-    this->link_type = pcap_datalink(handle);
-    for (;;) {
-        while ((packet = pcap_next(handle, &header)) != nullptr) {
-            if (header.len > header.caplen) continue;
-
-            this->end_addr = std::addressof(packet) + header.caplen;
-            u_char *payload = this->my_pcap_handler(packet);
-            if (payload) {
-                this->parse_payload(payload, false);
+                        this->end_addr = std::addressof(packet) + header.caplen;
+                        u_char *payload = this->my_pcap_handler(packet);
+                        if (payload) {
+                            this->parse_payload(payload, false);
+                        }
+                    }
+                    if (!mode) break;
+                }
+            } else {
+                std::perror("pcap_setfilter() failed:");
             }
+        } else {
+            std::perror("pcap_compile() failed:");
         }
-        if (!mode) break;
+    } else {
+        std::perror(mode ? "pcap_open_live() failed:" : "pcap_open_offline() failed:");
     }
 }
 
 
 ///< backward transformation domain name from the DNS form
 std::string DnsExport::read_name(unsigned char *reader, unsigned char *buffer, unsigned *count) {
-
     std::string name;
     bool jumped = false;
     *count = 1;
@@ -105,10 +104,8 @@ std::string DnsExport::read_name(unsigned char *reader, unsigned char *buffer, u
 ///< https://renenyffenegger.ch/notes/development/Base64/Encoding-and-decoding-base-64-with-cpp?fbclid=IwAR2R_B41ZHbJvIB5fpYIkwewW6idcMSEFnvKE_Pr72NqK1bl8Y-88kjv2qQ
 std::string DnsExport::base64_encode(unsigned char const *bytes_to_encode, unsigned int in_len) {
     std::string ret;
-    int i = 0;
-    int j = 0;
-    unsigned char char_array_3[3];
-    unsigned char char_array_4[4];
+    int i = 0, j = 0;
+    unsigned char char_array_3[3], char_array_4[4];
 
     while (in_len--) {
         char_array_3[i++] = *(bytes_to_encode++);
@@ -227,12 +224,10 @@ unsigned char *
 DnsExport::parse_transport_protocol(const unsigned char *packet, size_t offset, u_int8_t protocol, bool tcp_parse) {
     unsigned char *payload = nullptr;
 
-    if (protocol == IPPROTO_TCP and
-        std::addressof(packet) + offset + sizeof(tcphdr) <= this->end_addr) {
+    if (protocol == IPPROTO_TCP and std::addressof(packet) + offset + sizeof(tcphdr) <= this->end_addr) {
         const struct tcphdr *tcp_header = (tcphdr *) (packet + offset);
         if ((tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES) < IP_HEADER_MIN_LEN) {
-            std::cerr << "Invalid TCP header length: " << tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES
-                      << "bytes"
+            std::cerr << "Invalid TCP header length: " << tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES << "bytes"
                       << std::endl;
         }
 
@@ -243,7 +238,8 @@ DnsExport::parse_transport_protocol(const unsigned char *packet, size_t offset, 
             std::pair<const unsigned char *, const unsigned char **> packet_info = std::make_pair(packet_copy,
                                                                                                   this->end_addr);
             tcp_packets.push_back(packet_info);
-        } else if (&packet + offset + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES) <= this->end_addr) {
+        } else if (std::addressof(packet) + offset + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES) <=
+                   this->end_addr) {
             payload = (unsigned char *) (packet + offset + (tcp_header->th_off << FOUR_OCTET_UNIT_TO_BYTES));
         }
     } else if (protocol == IPPROTO_UDP and std::addressof(packet) + offset + sizeof(struct udphdr) <= this->end_addr) {
@@ -301,14 +297,13 @@ unsigned char *DnsExport::parse_IPv6_packet(const unsigned char *packet, size_t 
 unsigned char *DnsExport::my_pcap_handler(const unsigned char *packet, bool tcp_parse) {
     unsigned char *payload = nullptr;
 
-    size_t link_header_size = get_size_of_datalink(this->link_type);
-    if (std::addressof(packet) + link_header_size <= this->end_addr) {
+    if (std::addressof(packet) + this->datalink_header_length <= this->end_addr) {
         uint8_t network_protocol;
-        memcpy(&network_protocol, (packet+link_header_size), sizeof(uint8_t));
+        memcpy(&network_protocol, (packet + this->datalink_header_length), sizeof(uint8_t));
         if ((network_protocol >> UPPER_BYTE_HALF) == NETWORK_IPv4) {
-            payload = this->parse_IPv4_packet(packet, link_header_size, tcp_parse);
-        } else if ((network_protocol >> UPPER_BYTE_HALF) == NEXTHDR_IPV6) {
-            payload = this->parse_IPv6_packet(packet, link_header_size, tcp_parse);
+            payload = this->parse_IPv4_packet(packet, this->datalink_header_length, tcp_parse);
+        } else if ((network_protocol >> UPPER_BYTE_HALF) == NETWORK_IPv6) {
+            payload = this->parse_IPv6_packet(packet, this->datalink_header_length, tcp_parse);
         }
     }
 
@@ -584,14 +579,14 @@ std::string DnsExport::decode_dns_record(
         case DNS_ANS_TYPE_NS:
         case DNS_ANS_TYPE_CNAME:
         case DNS_ANS_TYPE_PTR:
+        case DNS_ANS_TYPE_SPF:
         case DNS_ANS_TYPE_TXT: {
             std::string txt_content = this->read_name(record_payload, buffer, record_length);
             if (!txt_content.empty()) result << decode_rr_type(record_type) << " " << txt_content;
             break;
         }
         default: {
-            result << "UNKNOWN RECORD TYPE: " << record_type;
-            break;
+            result << "UNSUPPORTED RECORD TYPE: " << decode_rr_type(record_type);
         }
     }
     return result.str();
@@ -610,7 +605,7 @@ void DnsExport::parse_payload(unsigned char *payload, bool tcp) {
         std::string qname;
         unsigned end = 0;
 
-        if (dns_header->QR == 1 and dns_header->RCODE == 0b0000 and
+        if (dns_header->QR == 1 and dns_header->RCODE == 0x00 and
             std::find(this->dns_ids.begin(), this->dns_ids.end(), ntohs(dns_header->ID)) == this->dns_ids.end()) {
             payload += sizeof(struct DNS_HEADER);
             for (unsigned i = 0; i < ntohs(dns_header->QDCOUNT); i++) {
@@ -665,7 +660,7 @@ void DnsExport::parse_payload(unsigned char *payload, bool tcp) {
 
 void DnsExport::proccess_tcp_packets() {
 
-    TCPReassembler tcp_reassembler(link_type);
+    TCPReassembler tcp_reassembler(this->datalink_header_length);
     this->tcp_packets = tcp_reassembler.reassembling_packets(this->tcp_packets);
     for (std::pair<const unsigned char *, const unsigned char **> &tcp_packet : this->tcp_packets) {
         this->end_addr = tcp_packet.second;
@@ -684,15 +679,14 @@ void handle_signal(int _) {
 
     if (pid == 0) {
         SyslogSender syslog_sender;
-        syslog_sender.sending_stats(syslog_server_addr, stats1);
+        syslog_sender.sending_stats(syslog_servers, stats1);
         kill(getpid(), SIGTERM);
-        return;
     } else if (pid > 0) {
         alarm(time_in_sec);
         return;
     } else {
         std::cerr << "System Error: fork() failed" << std::endl;
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
 }
@@ -702,7 +696,7 @@ void DnsExport::run(int argc, char **argv) {
     ArgumentParser argument_parser;
     argument_parser.parse_arguments(argc, argv);
     time_in_sec = argument_parser.time_in_seconds;
-    syslog_server_addr = argument_parser.syslog_server_addr;
+    syslog_servers = argument_parser.syslog_servers;
 
     if (argument_parser.pcap_files.empty()) {
         signal(SIGALRM, handle_signal);
@@ -712,11 +706,15 @@ void DnsExport::run(int argc, char **argv) {
         for (const std::string &file_name : argument_parser.pcap_files) {
             this->execute_sniffing(file_name.c_str());
             this->proccess_tcp_packets();
-            for (std::pair<std::string, int> stats_item: this->stats) {
-                std::cout << stats_item.first << " " << stats_item.second << std::endl;
+            if (argument_parser.syslog_servers.empty()) {
+                for (std::pair<std::string, int> stats_item: this->stats) {
+                    std::cout << stats_item.first << " " << stats_item.second << std::endl;
+                }
+            } else {
+                SyslogSender syslog_sender;
+                syslog_sender.sending_stats(syslog_servers, stats1);
             }
-            SyslogSender syslog_sender;
-            syslog_sender.sending_stats(syslog_server_addr, stats1);
+
         }
     }
 }

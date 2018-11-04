@@ -4,8 +4,8 @@
 /**
 * Default Contructor.
 */
-TCPReassembler::TCPReassembler(int link_type) {
-    this->link_type = link_type;
+TCPReassembler::TCPReassembler(size_t link_header_length) {
+    this->datalink_header_length = link_header_length;
 }
 
 

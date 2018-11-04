@@ -33,7 +33,7 @@
 
 class TCPReassembler : public DnsExport {
 public:
-    TCPReassembler(int link_type);
+    TCPReassembler(size_t link_header_length);
 
     ~TCPReassembler();
 
