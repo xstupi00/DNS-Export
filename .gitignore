@@ -7,8 +7,8 @@ cmake-build-debug/
 CMakeLists.txt
 
 ## pcap files
-*.pcap
-*.cap
+.output/
+.pcap_files/
 
 ## output files
 *.txt
