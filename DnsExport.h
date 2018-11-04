@@ -51,14 +51,18 @@
 
 #define FOUR_OCTET_UNIT_TO_BYTES    2
 #define EIGHT_OCTET_UNIT_TO_BYTES   3
+#define UPPER_BYTE_HALF             4
 #define IP_HEADER_MIN_LEN           20
 #define IPv6_HEADER_LEN             40
 #define IP_HEADER_MAX_LEN           60
+#define NETWORK_IPv4                4
+#define NETWORK_IPv6                6
 
-#define LINKTYPE_LINUX_SLL          113
-#define LINKTYPE_ETHERNET           1
 #define UNUSED(x) (void)(x)
 
+static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                        "abcdefghijklmnopqrstuvwxyz"
+                                        "0123456789+/";
 
 class DnsExport {
 public:
@@ -102,7 +106,9 @@ private:
 
     std::string proccess_bits_array(unsigned char *record_payload);
 
-    void parse_pcap_file(const char *name, bool mode = false);
+    void execute_sniffing(const char *name, bool mode = false);
+
+    std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len);
 };
 
 #endif //DNSEXPORT_H

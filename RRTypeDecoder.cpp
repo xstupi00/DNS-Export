@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <pcap-bpf.h>
 #include "DataStructures.h"
 
 
@@ -127,5 +128,69 @@ std::string decode_algorithm(int algorithm) {
         case 254: return "PRIVATEOID";
         case 255: return "RESERVED";
         default: return "UNKNOWN";
+    }
+}
+
+size_t get_size_of_datalink(int datalink_id) {
+    switch (datalink_id) {
+        case DLT_EN10MB:
+            return 14;
+        case DLT_IEEE802:
+            return 22;
+#ifdef __amigaos__
+        case DLT_MIAMI:
+            return 16;
+#endif
+#ifdef DLT_LOOP
+        case DLT_LOOP:
+#endif
+        case DLT_NULL:
+            return 4;
+        case DLT_SLIP:
+#ifdef DLT_SLIP_BSDOS
+        case DLT_SLIP_BSDOS:
+#endif
+#if (FREEBSD || OPENBSD || NETBSD || BSDI || MACOSX)
+            return 16;
+#else
+            return 24; /* Anyone use this??? */
+#endif
+        case DLT_PPP:
+#ifdef DLT_PPP_BSDOS
+        case DLT_PPP_BSDOS:
+#endif
+#ifdef DLT_PPP_SERIAL
+        case DLT_PPP_SERIAL:
+#endif
+#ifdef DLT_PPP_ETHER
+        case DLT_PPP_ETHER:
+#endif
+#if (FREEBSD || OPENBSD || NETBSD || BSDI || MACOSX)
+            return 4;
+#else
+#ifdef SOLARIS
+            return 8;
+#else
+            return 24; /* Anyone use this? */
+#endif /* ifdef solaris */
+#endif /* if freebsd || openbsd || netbsd || bsdi */
+        case DLT_RAW:
+            return 0;
+        case DLT_FDDI:
+            return 21;
+#ifdef DLT_ENC
+        case DLT_ENC:
+            return 12;
+#endif /* DLT_ENC */
+#ifdef DLT_LINUX_SLL
+        case DLT_LINUX_SLL:
+            return 16;
+#endif
+#ifdef DLT_IPNET
+        case DLT_IPNET:
+            return 24;
+#endif
+        default:
+            return -1;
     }
 }

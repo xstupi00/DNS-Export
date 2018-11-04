@@ -122,7 +122,7 @@ void SyslogSender::sending_stats(std::vector<struct AddressWrapper> syslog_serve
     bool not_send = true;
     for (std::pair<std::string, int> stats_item : stats) {
         not_send = true;
-        if (msg.str().size() + stats_item.first.size() + sizeof(int) <= 1024) { // 1KiB
+        if (msg.str().size() + stats_item.first.size() + sizeof(stats_item.second) + INET_ADDRSTRLEN <= 1024) {
             msg << stats_item.first << " " << stats_item.second << std::endl;
         } else {
             this->send_msg_to_server(syslog_servers, msg.str());
@@ -135,7 +135,6 @@ void SyslogSender::sending_stats(std::vector<struct AddressWrapper> syslog_serve
     }
     if (not_send) {
         this->send_msg_to_server(syslog_servers, msg.str());
-        //std::cout << msg.str() << std::endl;
     }
 }
 
