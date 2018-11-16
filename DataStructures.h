@@ -1,15 +1,8 @@
-#include <vector>
-
 std::string decode_rr_type(int rr_type);
 
 std::string decode_algorithm(int algorithm);
 
 size_t get_length_of_datalink(int datalink_id);
-
-struct AddressWrapper {
-    std::vector<struct sockaddr_in> addr_IPv4;
-    std::vector<struct sockaddr_in6> addr_IPv6;
-};
 
 struct __attribute__((__packed__)) linux_sll {
     uint16_t packet_type;
@@ -126,16 +119,16 @@ struct dnskey_record {
 # if __BYTE_ORDER == __LITTLE_ENDIAN
     uint8_t zone_key :1;
     uint8_t a1 :7;
+    uint8_t key_signining :1;
     uint8_t a2 :6;
     uint8_t key_revoked :1;
-    uint8_t key_signining :1;
 # endif
 # if __BYTE_ORDER == __BIG_ENDIAN
     uint8_t a1 :7;
     uint8_t zone_key :1;
-    uint8_t key_signining :1;
     uint8_t key_revoked :1;
     uint8_t a2 :6;
+    uint8_t key_signining :1;
 # endif
     uint8_t protocol;
     uint8_t algorithm;

@@ -1,21 +1,16 @@
 #ifndef SYSLOGSENDER_H
 #define SYSLOGSENDER_H
 
-#include <unordered_map>
-#include <ifaddrs.h>
 #include <arpa/inet.h>
-#include <net/if.h>
-#include <algorithm>
-#include <netdb.h>
-#include <syslog.h>
-#include <dirent.h>
-#include <sys/time.h>
-#include <fstream>
-#include <vector>
+#include <cstring>
 #include <iostream>
+#include <netdb.h>
 #include <sstream>
-#include <sys/types.h>
+#include <syslog.h>
+#include <sys/time.h>
 #include <unistd.h>
+#include <unordered_map>
+#include <vector>
 
 class SyslogSender {
 public:
@@ -23,15 +18,13 @@ public:
 
     ~SyslogSender();
 
-    void sending_stats(std::vector<std::string> syslog_servers, std::unordered_map<std::string, int> stats);
+    void send_to_server(std::vector<std::string> syslog_servers, std::unordered_map<std::string, int> stats);
 
     std::string generate_timestamp();
 
-    std::string get_local_hostname();
+    std::string get_local_hostname(int ai_family);
 
-    void send_msg_to_server(std::vector<std::string> syslog_servers, std::string msg);
-
-    size_t nth_substr(int n, const std::string& s, const std::string& p);
+    std::vector<std::string> create_msg(std::unordered_map<std::string, int> stats, int ai_family);
 
     int socket_fd;
 

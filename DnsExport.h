@@ -2,25 +2,18 @@
 #define DNSEXPORT_H
 
 #include <algorithm>
-#include <vector>
-#include <ctime>
-#include <unordered_map>
-#include <pcap.h>
-#include "ArgumentsParser.h"
-#include <iostream>
 #include <csignal>
-#include <cmath>
-#include <sstream>
-#include <iomanip>
+#include <pcap.h>
 #include <unistd.h>
+#include <unordered_map>
+
+#include "ArgumentsParser.h"
 
 #ifndef __FAVOR_BSD
 #define __FAVOR_BSD
 #endif
 #ifndef NETINET_TCP_H
-
 #include <netinet/tcp.h>
-
 #define NETINET_TCP_H
 #endif
 
@@ -53,6 +46,7 @@
 #define EIGHT_OCTET_UNIT_TO_BYTES   3
 #define UPPER_BYTE_HALF             4
 #define IP_HEADER_MIN_LEN           20
+#define TCP_HEADER_MIN_LEN          32
 #define IPv6_HEADER_LEN             40
 #define IP_HEADER_MAX_LEN           60
 #define NETWORK_IPv4                4
@@ -64,18 +58,20 @@ static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                         "abcdefghijklmnopqrstuvwxyz"
                                         "0123456789+/";
 
+extern std::unordered_map<std::string, int> stats;
+
 class DnsExport {
 public:
     DnsExport();
 
     ~DnsExport();
 
-    std::vector<std::pair<const unsigned char *, const unsigned char **>> tcp_packets;
-    std::unordered_map<std::string, int> stats;
-    std::vector<int> dns_ids;
+    std::vector<std::tuple<const unsigned char *, const unsigned char **, bool>> tcp_packets;
+    std::vector<uint16_t > dns_ids;
     const unsigned char **end_addr;
     size_t datalink_header_length;
     size_t ip_total_len = 0;
+    size_t network_payload = 0;
 
     void run(int argc, char **argv);
 
@@ -95,9 +91,9 @@ private:
 
     void proccess_next_header(const unsigned char *ipv6_header, uint8_t *next_header, unsigned *offset);
 
-    unsigned char *parse_IPv4_packet(const unsigned char *packet, size_t offset, bool tcp_parse = false);
+    unsigned char *parse_IPv4_packet(const unsigned char *packet, bool tcp_parse = false);
 
-    unsigned char *parse_IPv6_packet(const unsigned char *packet, size_t offset, bool tcp_parse = false);
+    unsigned char *parse_IPv6_packet(const unsigned char *packet, bool tcp_parse = false);
 
     virtual unsigned char *
     parse_transport_protocol(const unsigned char *packet, size_t offset, u_int8_t protocol, bool tcp_parse);

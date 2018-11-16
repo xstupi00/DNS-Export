@@ -1,7 +1,5 @@
 #include <string>
-#include <iostream>
 #include <pcap-bpf.h>
-#include "DataStructures.h"
 
 
 std::string decode_rr_type(int rr_type) {
@@ -95,7 +93,7 @@ std::string decode_rr_type(int rr_type) {
         case 32769: return "DLV";
         case 65280: return "PRIVATE";
         case 65535: return "RESERVED";
-        default: return "UNASSIGNED";
+        default: return "TYPE"+rr_type;
     }
 }
 
@@ -105,18 +103,18 @@ std::string decode_algorithm(int algorithm) {
 
     switch (algorithm) {
         case 0: return "DELETE";
-        case 1: return "RSA/MD5";
+        case 1: return "RSAMD5";
         case 2: return "DH";
-        case 3: return "DSA/SHA1";
+        case 3: return "DSASHA1";
         case 4: return "RESERVED";
-        case 5: return "RSA/SHA-1";
-        case 6: return "DSA-NSEC3-SHA1";
-        case 7: return "RSASHA1-NSEC3-SHA1";
-        case 8: return "RSA/SHA-256";
+        case 5: return "RSASHA1";
+        case 6: return "DSANSEC3SHA1";
+        case 7: return "RSASHA1NSEC3SHA1";
+        case 8: return "RSA/SHA256";
         case 9: return "RESERVED";
-        case 10: return "RSA/SHA-512";
+        case 10: return "RSASHA512";
         case 11: return "RESERVED";
-        case 12: return "ECC-GOST";
+        case 12: return "ECCGOST";
         case 13: return "ECDSAP256SHA256";
         case 14: return "ECDSAP384SHA384";
         case 15: return "ED25519";
@@ -127,7 +125,7 @@ std::string decode_algorithm(int algorithm) {
         case 253: return "PRIVATEDNS";
         case 254: return "PRIVATEOID";
         case 255: return "RESERVED";
-        default: return "UNKNOWN";
+        default: return "ALGORITHM"+algorithm;
     }
 }
 

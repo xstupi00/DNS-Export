@@ -4,34 +4,30 @@
 #   $ make clean        # Remove object files and deplist
 #   $ make clean-all    # Remove object files, deplist and binaries
 
-# Pack:
-#   $ tar -cvf xstupi00.tar *
+APP = dns-export
 
-CPPC = g++
-CPPFLAGS = -std=c++17 -Wall -Wextra -Wpedantic
-LDFLAGS= -lpcap
-DEPS = dep.list
-SRC= $(wildcard *.cpp)
-OBJ = $(SRC:.cpp=.o)
-EXEC = dns-export
+CXX = g++
+RM = rm -f
+CPPFLAGS = -g -std=c++11 -Wall -Wextra -Wpedantic
+LDLIBS= -lpcap
 
-.PHONY: all clean clean-all
+SRCS = $(wildcard *.cpp)
+OBJS = $(subst .cpp,.o,$(SRCS))
 
-all: $(DEPS) $(EXEC)
+all: $(APP)
 
-%.o : %.cpp
-	$(CPPC) $(CPPFLAGS) $(LDFLAGS) -c $<
+cd: clean clean-all
 
-$(DEPS): $(SRC)
-	$(CPPC) -MM $(SRC) > $(DEPS)
+$(APP): $(OBJS)
+	$(CXX) -o $(APP) $(OBJS) $(LDLIBS)
 
--include $(DEPS)
+depend: .depend
 
-$(EXEC): $(OBJ)
-	$(CPPC) $(CPPFLAGS) $^ $(LDFLAGS) -o $@
+.depend: $(SRCS)
+	$(RM) ./.depend 2>/dev/null
+	$(CXX) $(CPPFLAGS) -MM $^ >> ./.depend 2>/dev/null
 
 clean:
-	rm -f $(OBJ) $(DEPS)
+	$(RM) $(OBJS) $(APP)
 
-clean-all:
-	rm -f $(OBJ) $(DEPS) $(EXEC)
+include .depend

@@ -4,14 +4,18 @@ DnsExport dns_export;
 
 void signal_handler(int _) {
     UNUSED(_);
+    dns_export.proccess_tcp_packets();
     pid_t pid = fork();
 
     if (pid == 0) {
-        dns_export.proccess_tcp_packets();
-        for (std::pair<std::string, int> stats_item: dns_export.stats) {
-            std::cout << stats_item.first << " " << stats_item.second << std::endl;
+        if (stats.empty()) {
+            std::cout << "Empty stats! " << dns_export.tcp_packets.size() << std::endl;
+        } else {
+            for (std::pair<std::string, int> stats_item: stats) {
+                std::cout << stats_item.first << " " << stats_item.second << std::endl;
+            }
+            std::cout << std::endl;
         }
-        std::cout << std::endl;
         kill(getpid(), SIGTERM);
         return;
     } else if (pid > 0) {

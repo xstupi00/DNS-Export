@@ -1,9 +1,8 @@
-#include <bitset>
 #include "ArgumentsParser.h"
 
 
 /**
-* Default Contructor.
+* Default Constructor.
 */
 ArgumentParser::ArgumentParser() = default;
 
@@ -25,6 +24,7 @@ void ArgumentParser::parse_arguments(int argc, char **argv) {
     };
 
     std::bitset<4> args_arr;
+    time_in_seconds = 60;
 
     int opt;
     while ((opt = getopt_long(argc, argv, short_opts, long_opts, nullptr)) != -1) {
@@ -34,15 +34,16 @@ void ArgumentParser::parse_arguments(int argc, char **argv) {
                 exit(args_arr.any() ? EXIT_FAILURE : EXIT_SUCCESS);
             }
             case 'r': {
-                if (args_arr.to_ulong() & 0b0101) {
+                if (args_arr.to_ulong() & 0x5) {
                     std::cerr << "Wrong combinations of arguments!" << std::endl;
                     exit(EXIT_FAILURE);
                 } else {
-                    struct stat sb = {};
+                    struct stat sb;
                     if (stat(optarg, &sb) == 0) {
                         this->pcap_files.emplace_back(optarg);
                     } else {
                         std::perror("stat() failed: ");
+                        exit(EXIT_FAILURE);
                     }
                 }
                 args_arr.set(0);
@@ -60,7 +61,7 @@ void ArgumentParser::parse_arguments(int argc, char **argv) {
             }
             case 's': {
                 args_arr.set(2);
-                this->syslog_servers.emplace_back(optarg);
+                syslog_servers.emplace_back(optarg);
                 break;
             }
             case 't': {
@@ -69,7 +70,7 @@ void ArgumentParser::parse_arguments(int argc, char **argv) {
                     exit(EXIT_FAILURE);
                 } else {
                     args_arr.set(3);
-                    this->time_in_seconds = (unsigned) std::stoi(optarg);
+                    time_in_seconds = (unsigned) std::stoi(optarg);
                 }
                 break;
             }
@@ -79,7 +80,7 @@ void ArgumentParser::parse_arguments(int argc, char **argv) {
             }
         }
 
-        if (!(args_arr.to_ulong() & 0b0011)) {
+        if (!(args_arr.to_ulong() & 0x3)) {
             std::cerr << "Wrong combinations of arguments!" << std::endl;
             exit(EXIT_FAILURE);
         }
