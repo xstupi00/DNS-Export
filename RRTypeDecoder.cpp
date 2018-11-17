@@ -39,7 +39,7 @@ std::string decode_rr_type(int rr_type) {
         case 31: return "EID";
         case 32: return "NIMLOC";
         case 33: return "SRV";
-        case 34: return "ATM";
+        case 34: return "ATMA";
         case 35: return "NAPTR";
         case 36: return "KX";
         case 37: return "CERT";
@@ -50,7 +50,7 @@ std::string decode_rr_type(int rr_type) {
         case 42: return "APL";
         case 43: return "DS";
         case 44: return "SSHFP";
-        case 45: return "ISECKEY";
+        case 45: return "IPSECKEY";
         case 46: return "RRSIG";
         case 47: return "NSEC";
         case 48: return "DNSKEY";
@@ -60,11 +60,11 @@ std::string decode_rr_type(int rr_type) {
         case 52: return "TLSA";
         case 53: return "SMIMEA";
         case 55: return "HIP";
-        case 56: return "NIFO";
+        case 56: return "NINFO";
         case 57: return "RKEY";
         case 58: return "TALINK";
         case 59: return "CDS";
-        case 60: return "CDSKEY";
+        case 60: return "CDNSKEY";
         case 61: return "OPENPGPKEY";
         case 62: return "CSYNC";
         case 99: return "SPF";

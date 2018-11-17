@@ -1,0 +1,10 @@
+DnsExport.o: DnsExport.cpp DnsExport.h ArgumentsParser.h DataStructures.h \
+ TCPReassembler.h SyslogSender.h Base32Encoder.h
+ArgumentsParser.o: ArgumentsParser.cpp ArgumentsParser.h
+Base32Encoder.o: Base32Encoder.cpp Base32Encoder.h
+TCPReassembler.o: TCPReassembler.cpp TCPReassembler.h DnsExport.h \
+ ArgumentsParser.h DataStructures.h
+dns-export.o: dns-export.cpp DnsExport.h ArgumentsParser.h \
+ DataStructures.h SyslogSender.h
+RRTypeDecoder.o: RRTypeDecoder.cpp
+SyslogSender.o: SyslogSender.cpp SyslogSender.h
