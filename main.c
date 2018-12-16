@@ -32,6 +32,7 @@
  * @file    MK60DN512xxx10_Project.c
  * @brief   Application entry point.
  */
+
 #include <stdio.h>
 #include "board.h"
 #include "peripherals.h"
@@ -39,24 +40,137 @@
 #include "clock_config.h"
 #include "MK60D10.h"
 #include "fsl_debug_console.h"
-#include "core_cm4.h"
+#include "fsl_pit.h"
 
-unsigned cnt = 0;
+#define ROW_1_MASK  0x01000000
+#define ROW_2_MASK  0x00000080
+#define ROW_3_MASK  0x08000000
+#define ROW_4_MASK  0x04000000
+#define COL_1_MASK  0x10000000
+#define COL_2_MASK  0x02000000
+#define COL_3_MASK  0x20000000
+#define PIEZZO_MASK 0x00000010
 
-#define ROW_1_MASK 0x01000000
-#define ROW_2_MASK 0x00000080
-#define ROW_3_MASK 0x08000000
-#define ROW_4_MASK 0x04000000
-
-#define COL_1_MASK 0x10000000
-#define COL_2_MASK 0x02000000
-#define COL_3_MASK 0x20000000
 
 #define ROWS_KEYBOARD 		4
 #define COLUMNS_KEYBOARD	3
+#define BUTTONS			    12
+#define BUTTON_KEY			5
+#define MAX_ARR_SIZE 		127
+
+#define PIT_SOURCE_CLOCK CLOCK_GetFreq(kCLOCK_BusClk)
+
+unsigned last_key = 0;
+unsigned arr_index = 0;
+int key_tap = -1;
+char received_chars[MAX_ARR_SIZE];
+
+char button_keys[BUTTONS][BUTTON_KEY] = {
+		{'1'},
+		{'A', 'B', 'C', '2'},
+		{'D', 'E', 'F', '3'},
+		{'G', 'H', 'I', '4'},
+		{'J', 'K', 'L', '5'},
+		{'M', 'N', 'O', '6'},
+		{'P', 'R', 'S', 'Q', '7'},
+		{'T', 'U', 'V', '8'},
+		{'W', 'X', 'Y', 'Z', '9'},
+		{'*'},
+		{'0'},
+		{'#'},
+};
 
 void delay(uint64_t bound) {
 	for (uint64_t i=0; i < bound; i++) { __NOP(); }
+}
+
+void beep(void) {
+    for (uint32_t q=0; q<200; q++) {
+        GPIOA->PSOR = PIEZZO_MASK; delay(200);
+        GPIOA->PCOR = PIEZZO_MASK; delay(200);
+    }
+}
+
+void Reset_PIT_Timer(void) {
+	PIT_StopTimer(PIT, kPIT_Chnl_0);
+	PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
+	PIT_StartTimer(PIT, kPIT_Chnl_0);
+}
+
+void char_processing(void) {
+	unsigned letters_count = 0;
+	if (last_key == 7 || last_key == 9) {
+		letters_count = 5;
+	} else if (last_key == 2 || last_key == 3 || last_key == 4 || last_key == 5 || last_key == 6 || last_key == 8) {
+		letters_count = 4;
+	}
+	unsigned idx = key_tap % letters_count;
+
+	char ch = button_keys[last_key-1][idx];
+	if (ch == '*' || ch == '#') {
+
+	} else {
+		received_chars[arr_index++] = ch;
+	}
+	key_tap = -1;
+
+	for (unsigned i = 0; i < arr_index; i++) {
+		PRINTF("%c ", received_chars[i]);
+	}
+    beep();
+	PRINTF("\n");
+}
+
+
+void decode_char(int key) {
+	if (key == 1 || key == 10 || key == 11 || key == 12) {
+		key_tap++;
+		last_key = key;
+		char_processing();
+	} else if (last_key == key || key_tap == -1) {
+			key_tap++;
+			last_key = key;
+		    Reset_PIT_Timer();
+	} else {
+		char_processing();
+		key_tap++;
+		last_key = key;
+	    Reset_PIT_Timer();
+	}
+}
+
+void scanning_keyboard_rows(long COL_MASK, int array[4]) {
+	GPIOA->PSOR = ROW_1_MASK;
+	if (GPIOA->PDIR & COL_MASK) {
+		decode_char(array[0]);
+		GPIOA->PCOR = ROW_1_MASK;
+	} else {
+		GPIOA->PSOR = ROW_2_MASK;
+		if (GPIOA->PDIR & COL_MASK) {
+			decode_char(array[1]);
+			GPIOA->PCOR = ROW_1_MASK | ROW_2_MASK;
+		} else {
+			GPIOA->PSOR = ROW_3_MASK;
+			if (GPIOA->PDIR & COL_MASK) {
+				decode_char(array[2]);
+				GPIOA->PCOR = ROW_1_MASK | ROW_2_MASK | ROW_3_MASK;
+			} else {
+				GPIOA->PSOR = ROW_4_MASK;
+				if (GPIOA->PDIR & COL_MASK) {
+					decode_char(array[3]);
+					GPIOA->PCOR = ROW_1_MASK | ROW_2_MASK | ROW_3_MASK | ROW_4_MASK;
+				}
+			}
+		}
+	}
+}
+
+void PIT0_IRQHandler(void) {
+	/* Stop channel 0 */
+	PIT_StopTimer(PIT, kPIT_Chnl_0);
+    /* Clear channel 0 */
+	PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
+    char_processing();
 }
 
 void PORTA_IRQHandler(void) {
@@ -65,7 +179,8 @@ void PORTA_IRQHandler(void) {
 	// COL 1
 	if (PORTA->ISFR & COL_1_MASK) {
 		if (!(GPIOA->PDIR & COL_1_MASK)) {
-			PRINTF("COL 1\n");
+			int arr[4] = {1, 4, 7, 10};
+			scanning_keyboard_rows(COL_1_MASK, arr);
 		}
 		PORTA->ISFR |= COL_1_MASK;
 		return;
@@ -74,7 +189,8 @@ void PORTA_IRQHandler(void) {
 	// COL 2
 	if (PORTA->ISFR & COL_2_MASK) {
 		if (!(GPIOA->PDIR & COL_2_MASK)) {
-			PRINTF("COL 2\n");
+			int arr[4] = {2, 5, 8, 11};
+			scanning_keyboard_rows(COL_2_MASK, arr);
 		}
 		PORTA->ISFR |= COL_2_MASK;
 		return;
@@ -83,7 +199,8 @@ void PORTA_IRQHandler(void) {
 	// COL 3
 	if (PORTA->ISFR & COL_3_MASK) {
 		if (!(GPIOA->PDIR & COL_3_MASK)) {
-			PRINTF("COL 3\n");
+			int arr[4] = {3, 6, 9, 12};
+			scanning_keyboard_rows(COL_3_MASK, arr);
 		}
 		PORTA->ISFR |= COL_3_MASK;
 		return;
@@ -105,14 +222,30 @@ void MCU_Init(void) {
 						 | PORT_PCR_PS(0x01)); /* ...select Pull-Up */
     }
 
+    // output rows == 0
     PORTA->PCR[7]  |= PORT_PCR_MUX(0x01);  // Pin Mux Control - row 2
     PORTA->PCR[27] |= PORT_PCR_MUX(0x01);  // Pin Mux Control - row 3
     PORTA->PCR[26] |= PORT_PCR_MUX(0x01);  // Pin Mux Control - row 4
     PORTA->PCR[24] |= PORT_PCR_MUX(0x01);  // Pin Mux Control - row 1
-    GPIOA->PDDR |= ROW_1_MASK | ROW_2_MASK | ROW_3_MASK | ROW_4_MASK;
+	PORTA->PCR[4]  |= PORT_PCR_MUX(0x01);  // Pin Mux Control - GPIO (BZZZZZZ) */
+    GPIOA->PDDR |= ROW_1_MASK | ROW_2_MASK | ROW_3_MASK | ROW_4_MASK | PIEZZO_MASK;
 
 	NVIC_ClearPendingIRQ(PORTA_IRQn); /* Nuluj priznak preruseni od portu B */
 	NVIC_EnableIRQ(PORTA_IRQn);       /* Povol preruseni od portu B */
+}
+
+void PIT_Timer_Init(void) {
+    /* Structure of initialize PIT */
+    pit_config_t pitConfig;
+    PIT_GetDefaultConfig(&pitConfig);
+    /* Init pit module */
+    PIT_Init(PIT, &pitConfig);
+    /* Set timer period for channel 0 */
+    PIT_SetTimerPeriod(PIT, kPIT_Chnl_0, USEC_TO_COUNT(1000000U, PIT_SOURCE_CLOCK));
+    /* Enable timer interrupts for channel 0 */
+    PIT_EnableInterrupts(PIT, kPIT_Chnl_0, kPIT_TimerInterruptEnable);
+    /* Enable at the NVIC */
+    NVIC_EnableIRQ(PIT0_IRQn);
 }
 
 
@@ -120,6 +253,8 @@ void MCU_Init(void) {
  * @brief   Application entry point.
  */
 int main(void) {
-    MCU_Init();
-    while (1) ;
+	MCU_Init();
+    PIT_Timer_Init();
+    beep();
+    while (1) beep();
 }
