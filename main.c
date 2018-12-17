@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 /**
  * @file    MK60DN512xxx10_Project.c
  * @brief   Application entry point.
@@ -51,12 +51,13 @@
 #define COL_3_MASK  0x20000000
 #define PIEZZO_MASK 0x00000010
 
-
 #define ROWS_KEYBOARD 		4
 #define COLUMNS_KEYBOARD	3
 #define BUTTONS			    12
 #define BUTTON_KEY			5
 #define MAX_ARR_SIZE 		127
+#define LETTERS_NUMERALS	36
+#define	MAX_MORSE_LEN		5
 
 #define PIT_SOURCE_CLOCK CLOCK_GetFreq(kCLOCK_BusClk)
 
@@ -80,16 +81,30 @@ char button_keys[BUTTONS][BUTTON_KEY] = {
 		{'#'},
 };
 
+int morse_code[BUTTONS-2][BUTTON_KEY][MAX_MORSE_LEN] = {
+		{ {0, 1, 1, 1, 1} }, 													  // 1
+		{ {0, 1}, {1, 0, 0, 0}, {1, 0, 1, 0}, {0, 0, 1, 1, 1} }, 				  // A, B, C, 2
+		{ {1, 0, 0}, {0}, {0, 0, 1, 0}, {0, 0, 0, 1, 1} }, 		 				  // D, E, F, 3
+		{ {1, 1, 0}, {0, 0, 0, 0}, {0, 0}, {0, 0, 0, 0, 1} },	 				  // G, H, I, 4
+		{ {0, 1, 1, 1}, {1, 0, 1}, {0, 1, 0, 0}, {0, 0, 0, 0, 0} },				  // J, K, L, 5
+		{ {1, 1}, {1, 0}, {1, 1, 1}, {1, 0, 0, 0, 0} },							  // M, N, O, 6
+		{ {0, 1, 1, 0}, {0, 1, 0}, {0, 0, 0}, {1, 1, 0, 1}, {1, 1, 0, 0, 0,} },	  // P, R, S, Q, 7
+		{ {1}, {0, 0, 1}, {0, 0, 0, 1}, {1, 1, 1, 0, 0} },						  // T, U, V, 8
+		{ {0, 1, 1}, {1, 0, 0, 1}, {1, 0, 1, 1}, {1, 1, 0, 0}, {1, 1, 1, 1, 0} }, // W, X, Y, Z, 9
+		{ {1, 1, 1, 1, 1} }, 													  // 0
+};
+
 void delay(uint64_t bound) {
 	for (uint64_t i=0; i < bound; i++) { __NOP(); }
 }
 
 void beep(void) {
-    for (uint32_t q=0; q<200; q++) {
-        GPIOA->PSOR = PIEZZO_MASK; delay(200);
-        GPIOA->PCOR = PIEZZO_MASK; delay(200);
+    for (uint32_t q=0; q<500; q++) {
+        GPIOA->PDOR |=  PIEZZO_MASK; delay(500);
+        GPIOA->PDOR &= ~PIEZZO_MASK; delay(500);
     }
 }
+
 
 void Reset_PIT_Timer(void) {
 	PIT_StopTimer(PIT, kPIT_Chnl_0);
@@ -215,19 +230,19 @@ void MCU_Init(void) {
 
     int columns_idx[COLUMNS_KEYBOARD] = {25, 28, 29};
     for (uint8_t i = 0; i < COLUMNS_KEYBOARD; i++) {
-    	PORTA->PCR[columns_idx[i]] = ( PORT_PCR_ISF(0x01) /* Nuluj ISF (Interrupt Status Flag) */
-    					 | PORT_PCR_IRQC(0x0A) /* Interrupt enable on failing edge */
+		PORTA->PCR[columns_idx[i]] = ( PORT_PCR_ISF(0x01) /* Nuluj ISF (Interrupt Status Flag) */
+						 | PORT_PCR_IRQC(0x0A) /* Interrupt enable on failing edge */
 						 | PORT_PCR_MUX(0x01) /* Pin Mux Control to GPIO */
 						 | PORT_PCR_PE(0x01) /* Pull resistor enable... */
 						 | PORT_PCR_PS(0x01)); /* ...select Pull-Up */
-    }
+	}
 
-    // output rows == 0
-    PORTA->PCR[7]  |= PORT_PCR_MUX(0x01);  // Pin Mux Control - row 2
-    PORTA->PCR[27] |= PORT_PCR_MUX(0x01);  // Pin Mux Control - row 3
-    PORTA->PCR[26] |= PORT_PCR_MUX(0x01);  // Pin Mux Control - row 4
-    PORTA->PCR[24] |= PORT_PCR_MUX(0x01);  // Pin Mux Control - row 1
-	PORTA->PCR[4]  |= PORT_PCR_MUX(0x01);  // Pin Mux Control - GPIO (BZZZZZZ) */
+	// output rows == 0
+	PORTA->PCR[7]  = PORT_PCR_MUX(0x01) | PORT_PCR_DSE(0x01);  // Pin Mux Control - row 2
+	PORTA->PCR[27] = PORT_PCR_MUX(0x01) | PORT_PCR_DSE(0x01);  // Pin Mux Control - row 3
+	PORTA->PCR[26] = PORT_PCR_MUX(0x01) | PORT_PCR_DSE(0x01);  // Pin Mux Control - row 4
+	PORTA->PCR[24] = PORT_PCR_MUX(0x01) | PORT_PCR_DSE(0x01);  // Pin Mux Control - row 1
+	PORTA->PCR[4]  = PORT_PCR_MUX(0x01) | PORT_PCR_DSE(0x01);
     GPIOA->PDDR |= ROW_1_MASK | ROW_2_MASK | ROW_3_MASK | ROW_4_MASK | PIEZZO_MASK;
 
 	NVIC_ClearPendingIRQ(PORTA_IRQn); /* Nuluj priznak preruseni od portu B */
@@ -255,6 +270,5 @@ void PIT_Timer_Init(void) {
 int main(void) {
 	MCU_Init();
     PIT_Timer_Init();
-    beep();
-    while (1) beep();
+    while (1);
 }
