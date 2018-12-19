@@ -31,16 +31,49 @@ ArgumentParser::ArgumentParser() = default;
 */
 ArgumentParser::~ArgumentParser() = default;
 
+void print_help() {
+    std::cerr
+            << "dns-export:  process DNS (Domain Name System) protocol data and export it to central "
+                    "logging server using Syslog protocol.\n"
+                    "Usage:   dns-export [-r FILE.PCAP] [--pcap_file FILE.PCAP] [-i INTERFACE] "
+                    "[--interface INTERFACE] \n"
+                    "                    [-s  SYSLOG-SERVER]  [--syslog SYSLOG-SERVER] [-t SECONDS] "
+                    "[--time SECONDS]\n\n"
+                    "              -h, --help\n"
+                    "                       Print the the usage of application and exit.\n"
+                    "\n"
+                    "              -r, --pcap_file=FILE.PCAP\n"
+                    "                       Processing of the given FILE.PCAP and create stats from DNS "
+                    "protocol data, stored in it.\n"
+                    "                       This option can't be used in combination with -i or -t.\n"
+                    "\n"
+                    "              -i, --interface=INTERFACE\n"
+                    "                       Listen on given INTERFACE and process DNS traffic.\n"
+                    "                       This option can't be used in combination  with  -r.\n  "
+                    "                     Default value is any.\n"
+                    "\n"
+                    "              -s, --syslog=SYSLOG-SERVER\n"
+                    "                       Syslog server given by IPv4/IPv6/Hostname where the statistics "
+                    "will be send.\n"
+                    "\n"
+                    "              -t, --time=SECONDS\n"
+                    "                       SECONDS is time while stats will be computed.\n"
+                    "                       Default value is 60s.\n"
+                    "                       This option can't be used in combination with -r and must be "
+                    "used in combination with -s.\n"
+            << std::endl;
+}
+
 
 void ArgumentParser::parse_arguments(int argc, char **argv) {
     const char *const short_opts = "hr:i:s:t:";     ///< short forms of arguments
     const option long_opts[] = {                    ///< long forms of arguments
-            {"pcap_file",     required_argument, nullptr, 'r'},
-            {"interface",     required_argument, nullptr, 'i'},
-            {"syslog_server", required_argument, nullptr, 's'},
-            {"seconds",       required_argument, nullptr, 't'},
-            {"help",          no_argument,       nullptr, 'h'},
-            {nullptr, 0,                         nullptr, 0},
+            {"pcap_file", required_argument, nullptr, 'r'},
+            {"interface", required_argument, nullptr, 'i'},
+            {"syslog",    required_argument, nullptr, 's'},
+            {"time",      required_argument, nullptr, 't'},
+            {"help",      no_argument,       nullptr, 'h'},
+            {nullptr, 0,                     nullptr, 0},
     };
 
     std::bitset<4> args_arr;    ///< auxiliary array to check the acceptable combinations of arguments
@@ -50,12 +83,13 @@ void ArgumentParser::parse_arguments(int argc, char **argv) {
     while ((opt = getopt_long(argc, argv, short_opts, long_opts, nullptr)) != -1) {
         switch (opt) {
             case 'h': {     ///< printing of the manual page
-                std::cout << "TODO: MANUAL PAGE!" << std::endl;
+                print_help();
                 exit(args_arr.any() ? EXIT_FAILURE : EXIT_SUCCESS);
             }
             case 'r': {     ///< pcap file processing
-                if (args_arr.to_ulong() & 0x5) {    ///< check acceptable combinations
-                    std::cerr << "Wrong combinations of arguments!" << std::endl;
+                if (args_arr.test(1) or args_arr.test(3)) {    ///< check acceptable combinations
+                    std::cerr << "Wrong combinations of arguments!" << std::endl << std::endl;
+                    print_help();
                     exit(EXIT_FAILURE);
                 } else {
                     struct stat sb;
@@ -74,7 +108,8 @@ void ArgumentParser::parse_arguments(int argc, char **argv) {
             }
             case 'i': {     ///< interface name processing
                 if (args_arr.test(0)) {             ///< check acceptable combinations
-                    std::cerr << "Wrong combinations of arguments!" << std::endl;
+                    std::cerr << "Wrong combinations of arguments!" << std::endl << std::endl;
+                    print_help();
                     exit(EXIT_FAILURE);
                 } else {
                     ///< sets the flag for interface name argument
@@ -93,7 +128,8 @@ void ArgumentParser::parse_arguments(int argc, char **argv) {
             }
             case 't': {     ///< time in seconds argument processing
                 if (args_arr.test(0)) {             ///< check acceptable combinations
-                    std::cerr << "Wrong combinations of arguments!" << std::endl;
+                    std::cerr << "Wrong combinations of arguments!" << std::endl << std::endl;
+                    print_help();
                     exit(EXIT_FAILURE);
                 } else {
                     ///< store interval for sending the syslog messages
@@ -104,15 +140,17 @@ void ArgumentParser::parse_arguments(int argc, char **argv) {
                 break;
             }
             default: {      ///< unknown arguments
-                std::cerr << "Wrong combinations of arguments!" << std::endl;
+                std::cerr << "Wrong combinations of arguments!" << std::endl << std::endl;
+                print_help();
                 exit(EXIT_FAILURE);
             }
         }
+    }
 
-        if (!(args_arr.to_ulong() &
-              0x3)) { ///< offline and online mode commonly (pcap file and interface name was given)
-            std::cerr << "Wrong combinations of arguments!" << std::endl;
-            exit(EXIT_FAILURE);
-        }
+    ///< wrong combinations of arguments
+    if (!args_arr.test(2) and args_arr.test(3)) {
+        std::cerr << "Wrong combinations of arguments!" << std::endl << std::endl;
+        print_help();
+        exit(EXIT_FAILURE);
     }
 }

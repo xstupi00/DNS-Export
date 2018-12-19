@@ -1,3 +1,12 @@
+/***************************************************************************************
+*    Title: Base32 Encoding In C++
+*    Author: MadeBits 2018
+*    Project: cpp-base32
+*    Date: 07.11.2018
+*    Availability: https://github.com/madebits/cpp-base32
+*
+***************************************************************************************/
+
 #include "Base32Encoder.h"
 
 int Base32Encoder::GetEncode32Length(int bytes) {

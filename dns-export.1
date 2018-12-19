@@ -1,0 +1,123 @@
+.TH DNS-EXPORT 1 "19 November 2018" "version 1.0"
+.\"
+.\"
+.\"
+.SH NAME
+.RS
+dns-export \- process DNS (Domain Name System) protocol data and export it to central logging server using Syslog protocol
+.RE
+.\"
+.\"
+.\"
+.SH SYNOPSIS
+.RS
+.B dns-export 
+[\fB\-r\fR \fIFILE.PCAP\fR]
+[\fB\-\-pcap_file\fR \fIFILE.PCAP\fR]
+[\fB\-i\fR \fIINTERFACE\fR]
+[\fB\-\-interface\fR \fIINTERFACE\fR]
+[\fB\-s\fR \fISYSLOG-SERVER\fR]
+[\fB\-\-syslog\fR \fISYSLOG-SERVER\fR]
+[\fB\-t\fR \fISECONDS\fR]
+[\fB\-\-time\fR \fISECONDS\fR]
+.RE
+.\"
+.\"
+.\"
+.SH DESCRIPTION
+.RS
+Application serves the two modes. The first mode, when the application
+sniffing on the given \fIINTERFACE\fR with using libpcap in online. In the second mode,
+application processing the given PCAP \fIFILE\fR. In both modes application creates
+the statistics that are sending to the syslog server or printing to the standard output.
+.PP
+"DNS" refers to Domain Name System protocol specified in RFC 1035. 
+.PP
+DNS RRs Supported: 
+.RS
+RFC 1035: A, NS, CNAME, PTR, MX, TXT, SOA
+.PP
+RFC 1886: AAAA
+.PP
+RFC 2782: SRV
+.PP
+RFC 7208: SPF
+.RE
+.PP
+DNSSEC RRs Supported:
+.RS
+RFC 4034: DNSKEY, RRSIG, NSEC, DS, NSEC3, NSEC3PARAM
+.RE
+.PP
+In the online mode (sniffing at the interface), the program must be run as root or as the user with sufficient capabilities.
+.PP
+Both transport protocol (TCP and UDP) are supported at the sniffing of DNS traffic.
+.PP
+Both network protocol (IPv4 and IPv6) are supported at the sniffing of DNS traffic.
+.PP
+The majority of link-layer protocols are supported at the sniffing of DNS traffic.
+.PP
+Packes at which some error has occurred are ignored and the DNS Payload is not processing (packet with corrupted or incomplete fields).
+.PP
+For processing of DNS Responses is needed catching its relevant DNS Query - the same Identification Numbers.
+Therefore the filter selects the packets that have the source or destination port equal to 53.
+.PP
+Output:
+.RS
+When the application is sniffing on the given interface \fIINTERFACE\fR (online mode) every \fISECONDS\fR seconds
+will processed stats send to syslog server \fISYSLOG-SERVER\fR, if it is given or user can print stats to standard output by
+sending SIGUSR1 signal to application. 
+.PP
+Otherwise, in the offline mode are stats send to syslog server \fISYSLOG-SERVER\fR after processing pcap file \fIFILE.PCAP\fR or
+if syslog server is not given stats are printed to standard output.
+.PP
+.TP
+Format of printed stats:
+domain-name rr-type "rr-answer" count
+.RE
+.RE
+.\"
+.\"
+.\"
+.SH OPTIONS
+.RS
+.TP
+.BR \-h ", " \-\-help\fR
+Print the the usage of application and exit.
+.TP
+.BR \-r ", " \-\-pcap_file =\fIFILE.PCAP\fR
+Processing of the given \fIFILE.PCAP\fR and create stats from DNS protocol data, stored in it.
+This option can't be used in combination with \fB\-i\fR or \fB\-t\fR.
+.TP
+.BR \-i ", " \-\-interface =\fIINTERFACE\fR
+Listen on given \fIINTERFACE\fR and process DNS traffic. This option can't be used in combination with \fB\-r\fR. Default value is \fBany\fR. 
+.TP
+.BR \-s ", " \-\-syslog=\fISYSLOG-SERVER \fR
+Syslog server given by IPv4/IPv6/Hostname where the statistics will be send.
+.TP
+.BR \-t ", " \-\-time=\fISECONDS \fR
+\fISECONDS\fR is time while stats will be computed. Default value is \fB60s\fR. This option can't be used in combination with \fB\-r\fR and must be used in combination with \fB\-s\fR.
+.RE
+.\"
+.\"
+.\"
+.SH BUGS
+.RS
+The application does not support packet fragmentation on IP layer.
+.RE
+.\"
+.\"
+.\"
+.SH AUTHOR
+.RS
+Created by Stupinský Šimon (xstupi00@stud.fit.vutbr.cz)
+.RE
+.\"
+.\"
+.\"
+.SH SEE ALSO
+.RS
+\fBdig\fR(1), RFC1035, RFC1886, RFC 2782, RFC4034, RFC7208, Wireshark
+.PP
+Full documentation at: manual.pdf
+.RE

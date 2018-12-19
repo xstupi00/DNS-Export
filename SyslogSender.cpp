@@ -141,7 +141,7 @@ SyslogSender::send_to_server(std::vector<std::string> syslog_servers, std::unord
                         ///< send message to syslog serevr
                         ssize_t s1 = send(this->socket_fd, msg.c_str(), msg.length(), 0);
                         if (s1 < 0) {   ///< some error has occurred at sending to syslog server
-                            std::perror("sendto() failed");
+                            std::perror("send() failed");
                             send_failure = true;    ///< set failure flag
                             break;                  ///< stop the next sending
                         }
@@ -160,7 +160,7 @@ std::vector<std::string> SyslogSender::create_msg(std::unordered_map<std::string
 
     ///< formatting the introduction fields of message according to given specification and [RFC5424]
     msg << "<" << LOG_MAKEPRI(LOG_LOCAL0, LOG_INFO) << ">1 " << this->generate_timestamp() << " "
-        << this->get_local_hostname(ai_family) << " dns-export" << " " << getpid() << " - - ";
+        << this->get_local_hostname(ai_family) << " dns-export" << " " << getppid() << " - - ";
 
     ///< folding the statistics items to the syslog message
     for (std::pair<std::string, int> stats_item : stats) {
@@ -176,7 +176,8 @@ std::vector<std::string> SyslogSender::create_msg(std::unordered_map<std::string
             msg.clear();
             ///< create the new header for the next message
             msg << "<" << LOG_MAKEPRI(LOG_LOCAL0, LOG_INFO) << ">1 " << this->generate_timestamp() << " "
-                << this->get_local_hostname(ai_family) << " dns-export" << " " << getpid() << " - - ";
+                << this->get_local_hostname(ai_family) << " dns-export" << " " << getpid() << " - - "
+                << stats_item.first << " " << stats_item.second << std::endl;
         }
     }
     ///< insert the last message in the case when the capacity is still available

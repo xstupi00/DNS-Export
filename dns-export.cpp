@@ -17,7 +17,6 @@ extern void handle_alarm_signal(int _) {
             syslog_sender.send_to_server(syslog_servers, stats);
             ///< kill the child process
             kill(getpid(), SIGTERM);
-            return;
         } else if (pid > 0) {
             ///< set the new alarm for next round of sending stats to syslog server
             alarm(time_in_seconds);
@@ -46,11 +45,10 @@ extern void handle_sigusr_signal(int _) {
             for (std::pair<std::string, int> stats_item: stats) {
                 std::cout << stats_item.first << " " << stats_item.second << std::endl;
             }
-            std::cout << std::endl;
+            std::cout << "------------------------------------------------------------------------------" << std::endl;
         }
         ///< kill the child process
         kill(getpid(), SIGTERM);
-        return;
     } else if (pid > 0) {
         ///< back to the processing of packets
         return;

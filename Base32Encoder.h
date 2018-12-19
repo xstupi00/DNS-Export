@@ -1,3 +1,12 @@
+/***************************************************************************************
+*    Title: Base32 Encoding In C++
+*    Author: MadeBits 2018
+*    Project: cpp-base32
+*    Date: 07.11.2018
+*    Availability: https://github.com/madebits/cpp-base32
+*
+***************************************************************************************/
+
 #ifndef BASE32ENCODER_H
 #define BASE32ENCODER_H
 

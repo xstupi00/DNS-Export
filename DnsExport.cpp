@@ -22,7 +22,7 @@
 #include "SyslogSender.h"
 #include "Base32Encoder.h"
 
-///< global variables for access to it in the signal handler
+///< global variables for access to it in thsignal handler
 
 ///< interval for sending the syslog messages
 unsigned time_in_seconds;
@@ -60,11 +60,13 @@ void DnsExport::execute_sniffing(const char *name, bool mode) {
             if (pcap_setfilter(handle, &fp) != -1) {
                 ///< obtains the datalink header length
                 this->datalink_header_length = get_length_of_datalink(pcap_datalink(handle));
+                if ((int)this->datalink_header_length == -1) {
+                    std::cerr << "Invalid type of datalink header!" << std::endl;
+                    exit(EXIT_FAILURE);
+                }
                 for (;;) { ///< infinite loop for sniffing on the given network interface
                     ///< loop for processing the caught packets - one by one
                     while ((packet = pcap_next(handle, &header)) != nullptr) {
-                        ///< check the valid length of whole caught packet
-                        if (header.len > header.caplen) continue;
                         ///< store the pointer to the end of caught packet
                         this->end_addr = std::addressof(packet) + header.caplen;
                         ///< parsing the layers headers (link, network and transport)
@@ -79,12 +81,15 @@ void DnsExport::execute_sniffing(const char *name, bool mode) {
                 }
             } else {    ///< pcap_setfilter() failed
                 std::perror("pcap_setfilter() failed:");
+                exit(EXIT_FAILURE);
             }
         } else {        ///< pcap_compile() failed
             std::perror("pcap_compile() failed:");
+            exit(EXIT_FAILURE);
         }
     } else {            ///< pcap_open() failed
         std::perror(mode ? "pcap_open_live() failed:" : "pcap_open_offline() failed:");
+        exit(EXIT_FAILURE);
     }
     ///< close the packet handler
     pcap_close(handle);
@@ -770,16 +775,28 @@ std::string DnsExport::decode_dns_record(int record_type, unsigned record_length
         }
         case DNS_ANS_TYPE_NS:
         case DNS_ANS_TYPE_CNAME:
-        case DNS_ANS_TYPE_PTR:
+        case DNS_ANS_TYPE_PTR: { ///< RR Types that contains only content in the text of the domain name
+            unsigned offset = 0;
+            std::string domain_name = this->read_name(record_payload, buffer, &offset);
+            if (domain_name != "-")
+                result << decode_rr_type(record_type) << " \"" << domain_name;
+            break;
+        }
         case DNS_ANS_TYPE_SPF:
-        case DNS_ANS_TYPE_TXT: {    ///< RR Types that contains only content in the form of domain name
+        case DNS_ANS_TYPE_TXT: {    ///< RR Types that contains only content in the text form
             unsigned offset = 0;
             std::string txt_content = this->read_name(record_payload, buffer, &offset);
-            if (txt_content != "-") result << decode_rr_type(record_type) << " \"" << txt_content;
+            if (txt_content != "-")
+                result << decode_rr_type(record_type) << " \"" << (txt_content == "<ROOT>" ? "" : txt_content);
             break;
         }
         default: {      ///< unsupported RR Type
-            result << "UNSUPPORTED RR " << decode_rr_type(record_type);
+            result << decode_rr_type(record_type) << " \"";
+            for (unsigned i = 0; i < record_length; i++) {
+                result << std::hex << std::setfill('0') << std::setw(2)
+                       << (unsigned short) ((record_payload[i] & 0xFF));
+            }
+            result << std::dec;
             break;
         }
     }   ///< end switch(RR_TYPE)
@@ -804,7 +821,7 @@ void DnsExport::parse_payload(unsigned char *payload, bool tcp) {
         std::string qname;
         unsigned end = 0;
 
-        if (dns_header->QR == 0) {  ///< DNS QUERY
+        if (dns_header->QR == 0 and dns_header->QDCOUNT) {  ///< DNS QUERY
             ///< store DNS ID to the vector with IDs
             this->dns_ids.emplace_back(ntohs(dns_header->ID));
         } else if (dns_header->QR == 1 and dns_header->RCODE == 0x00 and
@@ -907,22 +924,21 @@ void DnsExport::run(int argc, char **argv) {
         ///< executing the sniffing
         this->execute_sniffing(argument_parser.interface_name.c_str(), true);
     } else {    ///< offline sniffing - processing of the given pcap file
-        //< gradually processing of given pcap files - one by one
+        ///< gradually processing of given pcap files - one by one
         for (const std::string &file_name : argument_parser.pcap_files) {
             ///< executing the sniffing
             this->execute_sniffing(file_name.c_str());
-            ///< processing of caught TCP packets
-            this->proccess_tcp_packets();
-            ///< check whether the syslog server was given
-            if (syslog_servers.empty()) {   ///< print stats on stdout
-                for (std::pair<std::string, int> stats_item: stats) {
-                    std::cout << stats_item.first << " " << stats_item.second << std::endl;
-                }
-            } else {    ///< send stats to syslog server
-                SyslogSender syslog_sender;
-                syslog_sender.send_to_server(syslog_servers, stats);
+        }
+        ///< processing of caught TCP packets
+        this->proccess_tcp_packets();
+        ///< check whether the syslog server was given
+        if (syslog_servers.empty()) {   ///< print stats on stdout
+            for (std::pair<std::string, int> stats_item: stats) {
+                std::cout << stats_item.first << " " << stats_item.second << std::endl;
             }
-
+        } else {    ///< send stats to syslog server
+            SyslogSender syslog_sender;
+            syslog_sender.send_to_server(syslog_servers, stats);
         }
     }
 }
